@@ -48,6 +48,8 @@
 			this.collision = {south : false , north : false , east : false , west : false} ;
 			this.movementAnimationTimeInterval ;
 			this.movementAnimationStarted = false ;
+			this.coinRotationAnimationTimeInterval ;
+			this.coinsCollected = 0 ;
 		}
 
 		// our game's protagonist
@@ -119,8 +121,8 @@
 
         //when the 1st row pillars have nothern walls, corresponding boundary walls should unshadowed as the basic layout has all upper boundary walls shadowed by default.
 
+
 		for (var i = 0 , rand ; i < dungeonPillarsCount ; i++) {
-			
 
             // as said earlier each pillar has a wall and it can be in either of 4 directions which is randomly generated
             rand = Math.floor(100*Math.random()/25) ; // 0 -> east , 1 -> south , 2 -> west , 3 -> north . 
@@ -130,29 +132,29 @@
             // && (rand == 0 || rand == 2) include this along with i>0 condition to avoid formation of long continuous horizontal walls alone
             if (i>0) {
             	if(dungeonWalls[dungeonWallsCount-1].type == rand) 
-            		{rand = Math.floor(100*Math.random()/25) ;}
+            		{rand = Math.floor(100*Math.random()/25) ;}//{i--; continue;}//
             }
 
             // avoiding vertically consectutive walls with similar type to create more crooked maze
             // && (rand == 1 || rand == 3) include this along with i>11 condition to avoid formation of long continuous vertical walls alone
             if (i>11) {
             	if (dungeonWalls[dungeonWallsCount-12].type == rand) 
-            		{rand = Math.floor(100*Math.random()/25) ;}
+            		{rand = Math.floor(100*Math.random()/25) ;}//{i--; continue;}//
             }
             
 
 
 
 
-            // avoiding formation of closed boxes/rooms formed by 4 adjacent pillars from 2 consecutive rows, 2 consecutive pillars from each row
+            // avoiding formation of closed boxes/rooms formed by 4 adjacent pillars like this ::
             if (i>12) {
-            	// anticlockwise orientation of walls to form a room
+            	// anticlockwise orientation of walls to form a room/box
             	if (dungeonWalls[dungeonWallsCount-1].type == 0 && dungeonWalls[dungeonWallsCount-12].type == 2 
             	                         && dungeonWalls[dungeonWallsCount-13].type == 1) {
             	    if (rand == 3) {i--; continue;}
                 }
 
-                // clockwise orientation of walls to form a room
+                // clockwise orientation of walls to form a room/box
                 if (dungeonWalls[dungeonWallsCount-1].type == 3 && dungeonWalls[dungeonWallsCount-12].type == 1 
             	                         && dungeonWalls[dungeonWallsCount-13].type == 0) {
             	    if (rand == 2) {i--; continue;}
@@ -224,11 +226,116 @@
 
 			dungeonWalls[dungeonWallsCount].type = rand ;
 
-			//console.log(dungeonWalls[dungeonWallsCount].type) ;
-
 			dungeonWallsCount++ ;			
 		}
 
+        
+
+
+		var coinRotationSprite = document.createElement("IMG") ;
+		coinRotationSprite.src = "sprites/rotating_coin_sprite.png" ;
+
+
+
+		var drawCoinRotationSprite = false ;
+
+		function coin (X,Y) {
+			this.x = X ;
+			this.y = Y ;
+			this.frameWidth = 40 ;
+			this.frameHeight = 40 ;
+			this.totalAnimationFrames = 10 ;
+			this.currentFrameIndex = 0 ;
+		}
+
+
+		var coins = [] , coinsCount = 0 ;
+
+
+
+        // generating coins like how we did for walls
+		for (var i = 0 , rand ; i < dungeonPillarsCount ; i++) {
+
+
+            // each pillar has a coin , it can be in either of the 4 directions (can also be inside the wall)
+            // or be inside the pillar ...... do this in the later stages
+            rand = Math.floor(100*Math.random()/25) ; // 0 -> east , 1 -> south , 2 -> west , 3 -> north 
+            // 4 -> inside the pillar ..... do this in the later stages , u need to add visibility of coin as pillars are part of basic layout
+            
+            
+                      	
+			if (rand == 0) {
+
+				coins[coinsCount] = new coin (dungeonPillars[i].x+100 , dungeonPillars[i].y) ;
+
+			} else { if (rand == 2) {
+
+				    // avoiding overlapping of present pillar's western coin to the horizontally preceeding pillar's eastern coin
+				    if ( i>0 && coins[coinsCount-1].x == dungeonPillars[i].x-100 ) 
+				        {i--; continue;}
+
+					coins[coinsCount] = new coin (dungeonPillars[i].x-100 , dungeonPillars[i].y) ;
+
+				} else { if (rand == 1) {
+
+					    coins[coinsCount] = new coin (dungeonPillars[i].x , dungeonPillars[i].y+100) ;
+
+				    }
+
+				}
+			}
+
+			if (rand == 3) {
+				if (i > 11) {
+
+					// avoiding overlapping of present pillar's northern coin to the vertically preceeding pillar's southern coin
+					if ( coins[coinsCount-12].y == dungeonPillars[i].y-100 ) 
+					 {i--; continue;}
+
+				} 
+				coins[coinsCount] = new coin(dungeonPillars[i].x , dungeonPillars[i].y-100) ;	    
+			}
+
+			//if (rand == 4) {coins[coinsCount] = new coin (dungeonPillars[i].x , dungeonPillars[i].y) ;}
+            
+
+
+			coinsCount++ ;
+
+						
+		}        
+
+
+		
+
+		// now this is the second step of coin generation , in the first step coins are generated only vertically and horizontally but not diagonally
+		for (var i = 0 , rand ; i < dungeonPillarsCount ; i++) {
+
+
+            rand = Math.floor(100*Math.random()/50) ; // 0 -> north-east , 1 -> south-west
+            
+            
+
+			if (rand == 0) {
+				if (i > 11) {
+
+					// avoiding overlapping of present pillar's north-eastern coin to the vertically preceeding pillar's horizontally succeeding pillar's south-western coin
+					if ( (coins[coinsCount-12+1].y == dungeonPillars[i].y-100) && (coins[coinsCount-12+1].x == dungeonPillars[i].x+100) ) 
+					    {coins[coinsCount] = new coin(dungeonPillars[i].x-100 , dungeonPillars[i].y+100) ;}//south-western coin
+					else 
+						{coins[coinsCount] = new coin(dungeonPillars[i].x+100 , dungeonPillars[i].y-100) ;}// north-eastern coin
+
+				}else {coins[coinsCount] = new coin(dungeonPillars[i].x+100 , dungeonPillars[i].y-100) ;}// north-eastern coin
+					    
+			}
+
+			if (rand == 1) {coins[coinsCount] = new coin(dungeonPillars[i].x-100 , dungeonPillars[i].y+100) ;}
+
+
+			coinsCount++ ;
+
+						
+		}
 
 
 
@@ -239,6 +346,8 @@
 		wallWithShadow.onload = function () { drawWallWithShadow = true ; }
 		
 		protagonistImage.onload = function () { drawProtagonist = true ; }
+
+		coinRotationSprite.onload = function () { drawCoinRotationSprite = true ; }
 
 
 
@@ -254,6 +363,17 @@
 
 			// drawing the basic dungeon layout
 			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
+
+			if(drawCoinRotationSprite) {
+
+				for (var i = 0; i < coinsCount ; i++) {
+
+					cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 
+				                   0 , coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2 , 
+				                   coins[i].y - coins[i].frameHeight/2 , coins[i].frameWidth , coins[i].frameHeight ) ;					
+				}
+
+			}
 
 
 			if (drawWallWithShadow) {
@@ -671,6 +791,14 @@
 			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
 			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
 
+				for (var i = 0; i < coinsCount ; i++) {
+
+					this.cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 0 , 
+						                coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2+overallDisplacement.x , 
+				                        coins[i].y - coins[i].frameHeight/2+overallDisplacement.y , coins[i].frameWidth , coins[i].frameHeight ) ;					
+				}
+
+
 			    for (var i = 0; i < dungeonWallsCount ; i++) {
 
 					if (dungeonWalls[i].shadowed) {
@@ -705,7 +833,6 @@
 						                                 dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50+overallDisplacement.y) ;		                              					
 				}
 
-
 			    this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
 				                    protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
 				                    protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
@@ -720,9 +847,19 @@
 
 			this.update = function () {
 
-				
 
+				for (var i = 0; i < coinsCount ; i++) {
 
+					if (protagonistObj.x>coins[i].x-40+overallDisplacement.x && protagonistObj.x<coins[i].x+40+overallDisplacement.x &&
+						protagonistObj.y+protagonistObj.actualHeight/2>coins[i].y-20+overallDisplacement.y && 
+						protagonistObj.y+protagonistObj.actualHeight/2<coins[i].y+50+overallDisplacement.y) 
+
+						{ protagonistObj.coinsCollected ++ ;
+						  coins.splice(i,1) ;
+						  coinsCount -- ;
+						  break; }
+					
+				}
 
 
 			} // end of update
@@ -752,14 +889,31 @@
 
 		function gameLoop() {
 
-			//game.update() ;
+			game.update() ;
 
 			game.draw() ;
 			
 			window.requestAnimationFrame(gameLoop) ;
 		}
 
-		var startGame = window.requestAnimationFrame(gameLoop) ;
+		function startGame () {
+
+			protagonistObj.coinRotationAnimationTimeInterval = setInterval(function () {
+
+						    for (var i = 0; i < coinsCount; i++) {
+
+						    	if (coins[i].currentFrameIndex == coins[i].totalAnimationFrames -1 ) {
+							        coins[i].currentFrameIndex = 0 ;
+						            } else { coins[i].currentFrameIndex++ ; }						    	
+						    }
+
+					    },80) ;
+
+
+			window.requestAnimationFrame(gameLoop) ;
+		} 
+
+		startGame();
 
 
 	</script>
