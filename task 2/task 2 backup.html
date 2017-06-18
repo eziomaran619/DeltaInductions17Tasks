@@ -46,7 +46,7 @@
 			this.actualHeight = 70 ;
 			this.actualWidth = 40 ;
 			this.direction = "south" ;
-			this.speed = 5 ;
+			this.speed = 20 ;
 			this.collision = {south : false , north : false , east : false , west : false} ;
 			this.movementAnimationTimeInterval ;
 			this.movementAnimationStarted = false ;
@@ -565,7 +565,7 @@
 			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
 			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
 
-			    //this.cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ;
+			    this.cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ;
 
 				for (var i = 0; i < coinsCount ; i++) {
 
@@ -952,7 +952,7 @@
 			// drawing the basic dungeon layout
 			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
 
-			//if (drawMainBossDoorKeyImage) {cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;}         	
+			if (drawMainBossDoorKeyImage) {cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;}         	
 
 			if(drawCoinRotationSprite) {
 
