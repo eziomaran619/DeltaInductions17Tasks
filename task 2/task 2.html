@@ -50,6 +50,9 @@
 			this.movementAnimationStarted = false ;
 			this.coinRotationAnimationTimeInterval ;
 			this.coinsCollected = 0 ;
+			this.footStepsSoundFile = document.createElement("AUDIO") ;
+
+			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
 		}
 
 		// our game's protagonist
@@ -450,6 +453,8 @@
 							protagonistObj.currentHorizontalFrameIndex = 1 ;
 						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
 
+					        protagonistObj.footStepsSoundFile.play() ;
+
 						    //overallDisplacement.y -= protagonistObj.speed ;
 
 					    } , 100 ) ;
@@ -512,7 +517,8 @@
 
 					
 					if (!protagonistObj.collision.south)
-					overallDisplacement.y -= protagonistObj.speed ;
+					{overallDisplacement.y -= protagonistObj.speed ;}
+					
 
 
 
@@ -531,6 +537,8 @@
 						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
 							protagonistObj.currentHorizontalFrameIndex = 1 ;
 						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
 
 						    //overallDisplacement.x += protagonistObj.speed ;
 
@@ -598,7 +606,7 @@
 
 
 					if (!protagonistObj.collision.west)
-					overallDisplacement.x += protagonistObj.speed ;
+					{overallDisplacement.x += protagonistObj.speed ;}
 				}
 
 
@@ -615,6 +623,8 @@
 							protagonistObj.currentHorizontalFrameIndex = 1 ;
 						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
 
+					        protagonistObj.footStepsSoundFile.play() ;
+  
 						    //overallDisplacement.x -= protagonistObj.speed ;
 
 					    } , 100 ) ;
@@ -682,7 +692,7 @@
 
 
 					if (!protagonistObj.collision.east)
-					overallDisplacement.x -= protagonistObj.speed ;
+					{overallDisplacement.x -= protagonistObj.speed ;}
 				}
 
 
@@ -698,6 +708,8 @@
 						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
 							protagonistObj.currentHorizontalFrameIndex = 1 ;
 						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
 
 						    //overallDisplacement.y += protagonistObj.speed ;
 
@@ -765,7 +777,7 @@
 
 
 					if (!protagonistObj.collision.north)
-					overallDisplacement.y += protagonistObj.speed ;
+					{overallDisplacement.y += protagonistObj.speed ;}
 				}
 
 
@@ -779,6 +791,8 @@
 				clearInterval(protagonistObj.movementAnimationTimeInterval) ;
 				protagonistObj.currentHorizontalFrameIndex = 0 ;
 				protagonistObj.movementAnimationStarted = false ;
+				protagonistObj.footStepsSoundFile.pause() ;
+				protagonistObj.footStepsSoundFile.load() ;
 
 			} ) ; 
 
@@ -857,6 +871,7 @@
 						{ protagonistObj.coinsCollected ++ ;
 						  coins.splice(i,1) ;
 						  coinsCount -- ;
+						  console.log("coins collected : " + protagonistObj.coinsCollected) ;
 						  break; }
 					
 				}
