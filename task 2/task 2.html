@@ -53,6 +53,10 @@
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
+
+			this.coinCollectionSoundFile = document.createElement("AUDIO") ;
+
+			this.coinCollectionSoundFile.src = "sound_files/magic_chime_on_collecting_coin.mp3" ;
 		}
 
 		// our game's protagonist
@@ -872,6 +876,11 @@
 						  coins.splice(i,1) ;
 						  coinsCount -- ;
 						  console.log("coins collected : " + protagonistObj.coinsCollected) ;
+
+						  protagonistObj.coinCollectionSoundFile.pause();
+						  protagonistObj.coinCollectionSoundFile.load();
+						  protagonistObj.coinCollectionSoundFile.play();
+
 						  break; }
 					
 				}
