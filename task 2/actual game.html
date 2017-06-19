@@ -55,11 +55,11 @@
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
-			this.footStepsSoundFile.volume = 0.3 ;
+			this.footStepsSoundFile.volume = 0.4 ;
 
 			this.coinCollectionSoundFile = document.createElement("AUDIO") ;
 			this.coinCollectionSoundFile.src = "sound_files/magic_chime_on_collecting_coin.mp3" ;
-			this.coinCollectionSoundFile.volume = 0.03 ;
+			this.coinCollectionSoundFile.volume = 0.05 ;
 
 			this.mainBossDoorKeyCollectionSoundFile = document.createElement("AUDIO") ;
 			this.mainBossDoorKeyCollectionSoundFile.src = "sound_files/magic_chime_on_collecting_the_keys.mp3" ;
@@ -812,27 +812,22 @@
 
 
 		
-		for (var randPillarIndex = Math.floor(100*Math.random()/(100/84)) , rand ; ; ) {
+		// randPillarIndex -> 3 to 83
+		for (var randPillarIndex = Math.floor(100*Math.random()/(100/81)) + 3 , rand ; ; randPillarIndex = Math.floor(100*Math.random()/(100/81)) + 3 ) 
+		{
+			if (randPillarIndex == (12 || 13 || 14 || 24 || 25 || 26)) {continue;}
 
-			rand = Math.floor(100*Math.random()/(100/8)) ;
+			// so the wont be anywhere near the pillars with index 0,1,2,12,13,14,24,25,26
 
-		    // u know what 0,1,2,3 imply :)
-		    // 4 -> south-east , 5 -> south-west , 6 -> north-west , 7 -> north-east
+			rand = Math.floor(100*Math.random()/50) ;
 
-		    for (var i = 0; i < dungeonWallsCount; i++) {
-		    	if (dungeonWalls[i].type == rand) {continue;}
-		    }
+		    // 0 -> south-east , 1 -> north-east
 
-				if (rand == 0) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y) ; }
-			    if (rand == 1) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x , dungeonPillars[randPillarIndex].y+100) ; }
-			    if (rand == 2) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x-100 , dungeonPillars[randPillarIndex].y) ; }
-			    if (rand == 3) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x , dungeonPillars[randPillarIndex].y-100) ; }
-			    if (rand == 4) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y+100) ; }
-			    if (rand == 5) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x-100 , dungeonPillars[randPillarIndex].y+100) ; }
-			    if (rand == 6) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x-100 , dungeonPillars[randPillarIndex].y-100) ; }
-			    if (rand == 7) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y-100) ; }
 
-			    break ;
+			if (rand == 0) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y+100) ; }
+			if (rand == 1) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y-100) ; }
+
+			break ;
 			
 		}
 
