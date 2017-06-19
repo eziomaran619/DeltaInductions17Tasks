@@ -1,6 +1,4 @@
-task2.html is the actual game (game will be really slow due to slow speed , access it if u want to check collision , else go for the other)
-in task2backup.html collision doesn't work as protagonist's speed = 20 , collision works only for speed = factors of 5
-open this to navigate the maze a lot faster (also no collision)and also to check the way in which sound guides u to the key location
+open game testing.html to test the game a lot faster as the speed of protagonist is increased (so collision wont work, to check collision open actual game.html), ull surf the maze faster, and keys will be visible, so on the whole the tesing process will be a lot easier
 
 game is not yet complete
 
