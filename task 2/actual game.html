@@ -23,7 +23,7 @@
 
 		var dungeonTopBoundary = 320 , dungeonBottomBoundary = 1820 , dungeonLeftBoundary = 710 , dungeonRightBoundary = 3210 ; 
 
-		var canvas = document.getElementById("gameCanvas") ;
+		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
 
 		//the backgrond image
 		var dungeonBasicLayout = document.createElement("IMG") ;
@@ -36,6 +36,7 @@
 		function protagonist () {
 			this.x = 760 ;
 			this.y = 370 ;
+			this.levelCompleted = false ;
 			this.type = "intelligent" ;
 			this.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
 			this.currentHorizontalFrameIndex = 0 ;
@@ -52,6 +53,9 @@
 			this.movementAnimationStarted = false ;
 			this.coinRotationAnimationTimeInterval ;
 			this.coinsCollected = 0 ;
+			this.levelCompletionCutSceneAnimationTimeInterval ;
+			this.cutSceneAnimationRadius = 5 ;
+			this.stopRequestingFrame = false ;
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -66,6 +70,9 @@
 
 			this.mainBossDoorKeyClueSoundFile = document.createElement("AUDIO") ;
 			this.mainBossDoorKeyClueSoundFile.src = "sound_files/main_boss_door_key_sound_clue.mp3" ;
+
+			this.mainBossDoorOpeningSoundFile = document.createElement("AUDIO") ;
+			this.mainBossDoorOpeningSoundFile.src = "sound_files/azumanga_on_finishing_level.mp3" ;
 			
 		}
 
@@ -74,7 +81,7 @@
 
 		// protagonist image
 		var protagonistImage = document.createElement("IMG") ;
-		protagonistImage.src = "character_sprites/intellligent_character_movement_sprite.png" ;
+		protagonistImage.src = "character_sprites/protagonist_movement_sprite.png" ;
 
 		// to avoid background being drawn over the other images as loading background image takes longer time due to bigger size
 		var drawProtagonist = false , drawWallWithShadow = false , drawWallWithoutShadow = false ;
@@ -151,11 +158,11 @@
 		function door(X,Y) {
 			this.x = X ;
 			this.y = Y ;
-			this.frameWidth = 50 ;
+			this.frameWidth = 237/6 ;
 			this.frameHeight = 50 ;
 			this.totalAnimationFrames = 6 ;
 			this.currentFrameIndex = 0 ;
-			this.key = false ;
+			this.doorOpeningAnimationTimeInterval ;
 		}
 
 		var exitDoorSprite = document.createElement("IMG") ;
@@ -187,15 +194,40 @@
 
 
 
-
-
-
-
+       
 
 
 		function Game() {
 
 			this.cxt = canvas.getContext("2d") ;
+
+			document.addEventListener("keydown" , function (e) {
+				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && 
+					  mainBossDoor.currentFrameIndex != mainBossDoor.totalAnimationFrames -1 ) {
+
+					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
+						protagonistObj.x<mainBossDoor.x+50+overallDisplacement.x &&
+					    protagonistObj.y>mainBossDoor.y+75-50+overallDisplacement.y && 
+					    protagonistObj.y<mainBossDoor.y+75+50+overallDisplacement.y) {
+
+						mainBossDoor.doorOpeningAnimationTimeInterval = setInterval(function () {
+
+							if (mainBossDoor.currentFrameIndex == mainBossDoor.totalAnimationFrames -1 ) {
+
+								clearInterval(mainBossDoor.doorOpeningAnimationTimeInterval) ;
+
+								protagonistObj.mainBossDoorOpeningSoundFile.play() ;
+
+								protagonistObj.levelCompleted = true ;
+							    
+						        } else { mainBossDoor.currentFrameIndex++ ; }
+
+						},80) ;
+					}
+
+				}
+			
+			} ) ;
 
 
 			document.addEventListener("keydown" , function (e) {
@@ -560,6 +592,10 @@
 
 			this.draw = function () {
 
+				if (!protagonistObj.levelCompleted) {
+
+
+
 				this.cxt.clearRect(0,0,canvas.width,canvas.height) ;
 
 			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
@@ -609,10 +645,44 @@
 						                                 dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50+overallDisplacement.y) ;		                              					
 				}
 
+				if (mainBossDoorKey.collected == true) {
+				this.cxt.drawImage( mainBossDoorSprite , mainBossDoor.frameWidth*mainBossDoor.currentFrameIndex , 0 , 
+					                mainBossDoor.frameWidth , mainBossDoor.frameHeight , 
+					                mainBossDoor.x - mainBossDoor.frameWidth/2+overallDisplacement.x , 
+					                mainBossDoor.y - mainBossDoor.frameHeight/2+overallDisplacement.y , 
+					                mainBossDoor.frameWidth , mainBossDoor.frameHeight ) ;
+			    }
+
 			    this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
 				                    protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
 				                    protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
 				                    protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
+
+
+
+				}else{
+					
+
+		            protagonistObj.levelCompletionCutSceneAnimationTimeInterval = setInterval ( function () {
+
+		            	cxt.lineWidth = 10 ;
+		                cxt.strokeStyle = "black" ;
+
+		    	        cxt.beginPath() ;
+		    	        cxt.arc(protagonistObj.x,protagonistObj.y,protagonistObj.cutSceneAnimationRadius,0,2*Math.PI) ;
+		    	        cxt.stroke() ;
+
+		    	        protagonistObj.cutSceneAnimationRadius += 9 ;
+
+		    	        if (protagonistObj.cutSceneAnimationRadius >= protagonistObj.x) {
+		    	 	        cxt.clearRect(0,0,canvas.width,canvas.height) ;
+		    	 	        protagonistObj.stopRequestingFrame = true ;
+		    	            clearInterval(protagonistObj.levelCompletionCutSceneAnimationTimeInterval) ;
+		    	        }
+
+		            } , 2000 ) ;
+
+				}
 
 
 
@@ -651,6 +721,23 @@
 
 					{ protagonistObj.mainBossDoorKeyCollectionSoundFile.play();
 					  mainBossDoorKey.collected = true ;
+
+					  for (var randPillarIndex ; ; ) {
+
+					  	randPillarIndex = Math.floor(100*Math.random()/(100/84)) ;
+
+					  	if (dungeonPillars[randPillarIndex].shadowed) {
+					  		mainBossDoor = new door(dungeonPillars[randPillarIndex].x , dungeonPillars[randPillarIndex].y+25) ;
+					  		break;
+					  	}else{
+					  		if (dungeonWalls[randPillarIndex].shadowed) {
+					  			mainBossDoor = new door(dungeonWalls[randPillarIndex].x , dungeonWalls[randPillarIndex].y+25) ;
+					  			break;
+					  		}else{continue;}
+					  	}
+					  
+					  }
+
 				    }
 
 
@@ -669,8 +756,7 @@
 
 
 			} // end of update
-
-		        
+      
 
 
 
@@ -686,6 +772,8 @@
 
 
 		function initializeNewLevel () {
+
+	    protagonistObj.levelCompleted = false ;
 
 
 		for (var i = 0 ; i < 7 ; i++) {
@@ -811,13 +899,12 @@
 
 
 
-		
 		// randPillarIndex -> 3 to 83
 		for (var randPillarIndex = Math.floor(100*Math.random()/(100/81)) + 3 , rand ; ; randPillarIndex = Math.floor(100*Math.random()/(100/81)) + 3 ) 
 		{
 			if (randPillarIndex == (12 || 13 || 14 || 24 || 25 || 26)) {continue;}
 
-			// so the wont be anywhere near the pillars with index 0,1,2,12,13,14,24,25,26
+			// so the key wont be anywhere near the pillars with index 0,1,2,12,13,14,24,25,26
 
 			rand = Math.floor(100*Math.random()/50) ;
 
@@ -1037,6 +1124,10 @@
 
 
 
+		
+
+
+
 
 
 
@@ -1052,20 +1143,21 @@
 
 			game.draw() ;
 			
-			window.requestAnimationFrame(gameLoop) ;
+			if (!protagonistObj.stopRequestingFrame)
+			{window.requestAnimationFrame(gameLoop) ;}
 		
 		}
 
 
-
+        var myVar ;
 
 
 		function startNewLevel () {
 
 			initializeNewLevel() ;
+			    
+			myVar = window.requestAnimationFrame(gameLoop) ;
 
-
-			window.requestAnimationFrame(gameLoop) ;
 
 
 			/*for ( ; protagonistAlive ; ) {
