@@ -25,8 +25,8 @@
 		function mouseAim () {
 			this.x = 100 ;
 			this.y = 100 ;
-			this.frameHeight = 100 ;
-			this.frameWidth = 100 ;
+			this.frameHeight = 50 ;
+			this.frameWidth = 50 ;
 		}
 
 		var aim = new mouseAim() ;
@@ -83,7 +83,7 @@
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 500 ; // 400 to 600 is playable , false -> full visibility
+			this.visionRadius = 600 ; // 400 to 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -270,27 +270,33 @@
 			this.cxt = canvas.getContext("2d") ;
 
 			document.addEventListener("keydown" , function (e) {
+
 				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && 
-					  mainBossDoor.currentFrameIndex != mainBossDoor.totalAnimationFrames -1 ) {
+					  mainBossDoor.currentFrameIndex == 0 ) {
 
 					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
 						protagonistObj.x<mainBossDoor.x+50+overallDisplacement.x &&
 					    protagonistObj.y>mainBossDoor.y+75-50+overallDisplacement.y && 
 					    protagonistObj.y<mainBossDoor.y+75+50+overallDisplacement.y) {
 
+						protagonistObj.mainBossDoorKeyClueSoundFile.pause () ;
+					    protagonistObj.mainBossDoorKeyClueSoundFile.load () ;
+
+						level ++ ;
+
+
 						mainBossDoor.doorOpeningAnimationTimeInterval = setInterval(function () {
 
 							if (mainBossDoor.currentFrameIndex == mainBossDoor.totalAnimationFrames -1 ) {
 
+						        protagonistObj.mainBossDoorOpeningSoundFile.play() ;
+
+						        protagonistObj.levelCompleted = true ;
+
 								clearInterval(mainBossDoor.doorOpeningAnimationTimeInterval) ;
-
-								protagonistObj.mainBossDoorOpeningSoundFile.play() ;
-
-								protagonistObj.levelCompleted = true ;
-
-								level ++ ;
 							    
-						        } else { mainBossDoor.currentFrameIndex++ ; }
+						        } else { protagonistObj.mainBossDoorKeyClueSoundFile.pause () ; 
+						        	     mainBossDoor.currentFrameIndex++ ; }
 
 						},80) ;
 					}
@@ -775,29 +781,34 @@
 
 				else{
 
-					protagonistObj.cutSceneAnimationRadius = 5 ;
-					protagonistObj.cutSceneAnimation = true ;
+					if (mainBossDoor.currentFrameIndex == mainBossDoor.totalAnimationFrames -1) {
+
+						protagonistObj.cutSceneAnimationRadius = 5 ;
+					    protagonistObj.cutSceneAnimation = true ;
 					
 
-		            protagonistObj.cutSceneAnimationTimeInterval = setInterval ( function () {
+		                protagonistObj.cutSceneAnimationTimeInterval = setInterval ( function () {
 
-		            	cxt.lineWidth = 10 ;
-		                cxt.strokeStyle = "black" ;
+		            	    cxt.lineWidth = 10 ;
+		                    cxt.strokeStyle = "black" ;
 
-		    	        cxt.beginPath() ;
-		    	        cxt.arc(protagonistObj.x,protagonistObj.y,protagonistObj.cutSceneAnimationRadius,0,2*Math.PI) ;
-		    	        cxt.stroke() ;
+		    	            cxt.beginPath() ;
+		    	            cxt.arc(protagonistObj.x,protagonistObj.y,protagonistObj.cutSceneAnimationRadius,0,2*Math.PI) ;
+		    	            cxt.stroke() ;
 
-		    	        protagonistObj.cutSceneAnimationRadius += 9 ;
+		    	            protagonistObj.cutSceneAnimationRadius += 9 ;
 
-		    	        if (protagonistObj.cutSceneAnimationRadius >= 850) {
-		    	 	        cxt.clearRect(0,0,canvas.width,canvas.height) ;
-		    	 	        protagonistObj.stopRequestingFrame = true ;
-		    	 	        clearInterval(protagonistObj.coinRotationAnimationTimeInterval) ;
-		    	            clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
-		    	        }
+		    	            if (protagonistObj.cutSceneAnimationRadius >= 850) {
+		    	 	            cxt.clearRect(0,0,canvas.width,canvas.height) ;
+		    	 	            protagonistObj.stopRequestingFrame = true ;
+		    	 	            clearInterval(protagonistObj.coinRotationAnimationTimeInterval) ;
+		    	                clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
+		    	            }
 
-		            } , 30 ) ;
+		                } , 30 ) ;
+
+					}
+					
 
 				}
 
@@ -860,13 +871,46 @@
 
 				if (!mainBossDoorKey.collected) {
 
-					protagonistObj.mainBossDoorKeyClueSoundFile.volume = (50/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoorKey.x + 
-						overallDisplacement.x),2) + Math.pow(protagonistObj.y-(mainBossDoorKey.y + overallDisplacement.y),2))) ;
+					if (  (50/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoorKey.x + overallDisplacement.x),2) + 
+							   Math.pow(protagonistObj.y-(mainBossDoorKey.y + overallDisplacement.y),2)))   >=1  ) 
+						{
+
+							protagonistObj.mainBossDoorKeyClueSoundFile.volume = 1 ;
+
+						}
+						else
+						{
+
+							protagonistObj.mainBossDoorKeyClueSoundFile.volume = (50/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoorKey.x + 
+					        overallDisplacement.x),2) + Math.pow(protagonistObj.y-(mainBossDoorKey.y + overallDisplacement.y),2))) ;
+
+						}
 
 					protagonistObj.mainBossDoorKeyClueSoundFile.play() ;
 				}
-				else{protagonistObj.mainBossDoorKeyClueSoundFile.pause() ;
-					protagonistObj.mainBossDoorKeyClueSoundFile.load() ;}   
+				else{
+					if (mainBossDoor.currentFrameIndex == 0) {
+
+						if (  (30/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoor.x + overallDisplacement.x),2) + 
+							   Math.pow(protagonistObj.y-(mainBossDoor.y + overallDisplacement.y),2)))   >=1  ) 
+						{
+
+							protagonistObj.mainBossDoorKeyClueSoundFile.volume = 1 ;
+
+						}
+						else
+						{
+
+							protagonistObj.mainBossDoorKeyClueSoundFile.volume = (30/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoor.x + 
+					        overallDisplacement.x),2) + Math.pow(protagonistObj.y-(mainBossDoor.y + overallDisplacement.y),2))) ;
+
+						}
+
+						
+
+					    protagonistObj.mainBossDoorKeyClueSoundFile.play() ;
+					}
+				}   
 
 
 
@@ -1405,7 +1449,7 @@
 
 		    	setTimeout ( function () {
 		    		startNewLevel() ;
-		    	} , 2000 );
+		    	} , 2500 );
 
 		    }
 		
