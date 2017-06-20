@@ -72,7 +72,7 @@
 			this.actualHeight = 70 ;
 			this.actualWidth = 40 ;
 			this.direction = "south" ;
-			this.speed = 5 ;
+			this.speed = 10 ;
 			this.collision = {south : false , north : false , east : false , west : false} ;
 			this.movementAnimationTimeInterval ;
 			this.movementAnimationStarted = false ;
@@ -83,7 +83,7 @@
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 600 ; // 600 is playable , false -> full visibility
+			this.visionRadius = 500 ; // 400 to 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -337,9 +337,11 @@
 						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
 						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
 
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2 == dungeonPillars[i].y-50+overallDisplacement.y)   )  
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonPillars[i].y-50+overallDisplacement.y)  &&
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonPillars[i].y+50+overallDisplacement.y) )  
 
-						        {protagonistObj.collision.south = true;
+						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonPillars[i].y - 50) ;
+						        protagonistObj.collision.south = true;
 						        break;}
 
 					    else 	
@@ -361,9 +363,11 @@
 						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
 						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
 
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2 == dungeonWalls[i].y-50+overallDisplacement.y)   )  
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonWalls[i].y-50+overallDisplacement.y)  &&
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonWalls[i].y+50+overallDisplacement.y)   )  
 
-						            {protagonistObj.collision.south = true;
+						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonWalls[i].y-50) ;
+						            protagonistObj.collision.south = true;
 						            break;}
 
 					        else 	
@@ -372,8 +376,10 @@
 
 				        }
 
-				        if (protagonistObj.y+protagonistObj.actualHeight/2 == dungeonBottomBoundary+overallDisplacement.y) 
-				        {protagonistObj.collision.south = true;}
+				        if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y) 
+
+				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
+				        protagonistObj.collision.south = true;}
 
 				    }
 
@@ -422,9 +428,11 @@
 						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
 						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
 
-				    	        (protagonistObj.x-protagonistObj.actualWidth/2 == dungeonPillars[i].x+50+overallDisplacement.x)   )  
+				    	        (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  &&
+				    	        (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  )  
 
-						        {protagonistObj.collision.west = true;
+						        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonPillars[i].x+50) ;
+						        protagonistObj.collision.west = true;
 						        break;}
 
 					    else 	
@@ -447,9 +455,11 @@
 						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
 						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
 
-				    	            (protagonistObj.x-protagonistObj.actualWidth/2 == dungeonWalls[i].x+50+overallDisplacement.x)   )  
+				    	            (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)  &&
+				    	            (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   )  
 
-						            {protagonistObj.collision.west = true;
+						            {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonWalls[i].x+50) ;
+						            protagonistObj.collision.west = true;
 						            break;}
 
 					        else 	
@@ -458,8 +468,10 @@
 					  
 				        }
 
-				        if (protagonistObj.x-protagonistObj.actualWidth/2 == dungeonLeftBoundary+overallDisplacement.x) 
-				        {protagonistObj.collision.west = true;}
+				        if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x) 
+
+				        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
+				        protagonistObj.collision.west = true;}
 
 				    }
                     
@@ -508,9 +520,11 @@
 						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
 						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
 
-				    	        (protagonistObj.x+protagonistObj.actualWidth/2 == dungeonPillars[i].x-50+overallDisplacement.x)   )  
+				    	        (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  && 
+				    	        (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  )  
 
-						        {protagonistObj.collision.east = true;
+						        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonPillars[i].x-50) ;
+						        protagonistObj.collision.east = true;
 						        break;}
 
 					    else 	
@@ -533,9 +547,11 @@
 						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
 						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
 
-				    	            (protagonistObj.x+protagonistObj.actualWidth/2 == dungeonWalls[i].x-50+overallDisplacement.x)   )  
+				    	            (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   &&
+				    	            (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)   )  
 
-						            {protagonistObj.collision.east = true;
+						            {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonWalls[i].x-50) ;
+						            protagonistObj.collision.east = true;
 						            break;}
 
 					        else 	
@@ -544,8 +560,9 @@
 					  
 				        }
 
-				        if (protagonistObj.x+protagonistObj.actualWidth/2 == dungeonRightBoundary+overallDisplacement.x) 
-				        {protagonistObj.collision.east = true;}
+				        if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
+				        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
+				        protagonistObj.collision.east = true;}
 
 				    }
 
@@ -594,9 +611,11 @@
 						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
 						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
 
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 == dungeonPillars[i].y+50+overallDisplacement.y)   )  
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonPillars[i].y+50+overallDisplacement.y)  &&  
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonPillars[i].y-50+overallDisplacement.y) )  
 
-						        {protagonistObj.collision.north = true;
+						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonPillars[i].y + 50) ;
+						        protagonistObj.collision.north = true;
 						        break;}
 
 					    else 	
@@ -618,9 +637,11 @@
 						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
 						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
 
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 == dungeonWalls[i].y+50+overallDisplacement.y)   )  
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonWalls[i].y+50+overallDisplacement.y)  &&  
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonWalls[i].y-50+overallDisplacement.y) )  
 
-						            {protagonistObj.collision.north = true;
+						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonWalls[i].y + 50) ;
+						            protagonistObj.collision.north = true;
 						            break;}
 
 					        else 	
@@ -629,8 +650,9 @@
 
 				        }
 
-				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 == dungeonTopBoundary+overallDisplacement.y) 
-				        {protagonistObj.collision.north = true;}
+				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
+				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
+				        protagonistObj.collision.north = true;}
 
 				    }
 
