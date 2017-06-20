@@ -19,8 +19,6 @@
 	<script type="text/javascript">  //initially draw the basic layout at 610 , 220 i.e top left corner co-ordinates
 		'use strict'
 
-		var protagonistAlive = true ;
-
 		var dungeonTopBoundary = 320 , dungeonBottomBoundary = 1820 , dungeonLeftBoundary = 710 , dungeonRightBoundary = 3210 ; 
 
 		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
@@ -29,14 +27,12 @@
 		var dungeonBasicLayout = document.createElement("IMG") ;
 		dungeonBasicLayout.src = "dungeon_basic_layout.png" ;
 
-		// remember camera is fixed to the protagonist, so the entire surrounding moves, so is the overallDisplacement object
-		var overallDisplacement = { x:0 , y:0 } ;
+		var drawEverything = false ;
 
 		// protagonist object constructor
 		function protagonist () {
 			this.x = 760 ;
 			this.y = 370 ;
-			this.levelCompleted = false ;
 			this.type = "intelligent" ;
 			this.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
 			this.currentHorizontalFrameIndex = 0 ;
@@ -53,9 +49,11 @@
 			this.movementAnimationStarted = false ;
 			this.coinRotationAnimationTimeInterval ;
 			this.coinsCollected = 0 ;
-			this.levelCompletionCutSceneAnimationTimeInterval ;
+			this.cutSceneAnimationTimeInterval ;
 			this.cutSceneAnimationRadius = 5 ;
 			this.stopRequestingFrame = false ;
+			this.levelCompleted = false ;
+			this.cutSceneAnimation = true ;
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -76,16 +74,12 @@
 			
 		}
 
-		// our game's protagonist
-		var protagonistObj = new protagonist() ;
+		// to avoid background being drawn over the other images as loading background image takes longer time due to bigger size
+		var drawProtagonist = false , drawWallWithShadow = false , drawWallWithoutShadow = false ;
 
 		// protagonist image
 		var protagonistImage = document.createElement("IMG") ;
 		protagonistImage.src = "character_sprites/protagonist_movement_sprite.png" ;
-
-		// to avoid background being drawn over the other images as loading background image takes longer time due to bigger size
-		var drawProtagonist = false , drawWallWithShadow = false , drawWallWithoutShadow = false ;
-
 		
 		// wall with shadow image
 		var wallWithShadow = document.createElement("IMG") ;
@@ -94,6 +88,27 @@
 		// wall without shadow image
 		var wallWithoutShadow = document.createElement("IMG") ;
 		wallWithoutShadow.src = "wall_without_shadow.png" ;
+
+
+
+		var drawCoinRotationSprite = false , drawMainBossDoorKeyImage = false ;
+
+
+        var coinRotationSprite = document.createElement("IMG") ;
+		coinRotationSprite.src = "sprites/rotating_coin_sprite.png" ;		
+
+		var mainBossDoorKeyImage = document.createElement("IMG") ;
+		mainBossDoorKeyImage.src = "key.png" ;
+
+		var mainBossDoorSprite = document.createElement("IMG") ;
+		mainBossDoorSprite.src = "sprites/main_boss_door_sprite.png" ;
+
+		var drawDungeonfloorTile = false ;
+
+		var dungeonFloorTileImage = document.createElement("IMG") ;
+		dungeonFloorTileImage.src = "dungeon_floor_tile.png" ;
+		
+
 
 
 		// pillar constructor
@@ -107,8 +122,6 @@
 			// as the probability to be shadowed is more, it is made default
 		}
 
-		var dungeonPillars = [] , dungeonPillarsCount = 0 ;
-
 
         // each pillar has one and only wall
 		function wall (X,Y) {
@@ -119,11 +132,6 @@
 			this.shadowed ; // here the probability ratio is unity, so no bias
 			this.type ;
 		}
-		
-
-		var dungeonWalls = [] , dungeonWallsCount = 0 ;
-
-        // without any doubt variable i and dungeonWallsCount are the same, but usage of 2 separate variables for dungeonWalls and dungeonPillars makes life our job easier
 
         function dungeonUpperBoundaryWall (X,Y) {
 			this.x = X ;
@@ -131,16 +139,6 @@
 			this.width = 100 ;
 			this.height = 100 ;
 		}
-
-        var dungeonUpperBoundaryWallsToBeUnshadowed = [] , dungeonUpperBoundaryWallsToBeUnshadowedCount = 0 ;
-
-
-        var coinRotationSprite = document.createElement("IMG") ;
-		coinRotationSprite.src = "sprites/rotating_coin_sprite.png" ;
-
-
-
-		var drawCoinRotationSprite = false ;
 
 		function coin (X,Y) {
 			this.x = X ;
@@ -150,9 +148,6 @@
 			this.totalAnimationFrames = 10 ;
 			this.currentFrameIndex = 0 ;
 		}
-
-
-		var coins = [] , coinsCount = 0 ;
 
 
 		function door(X,Y) {
@@ -165,16 +160,6 @@
 			this.doorOpeningAnimationTimeInterval ;
 		}
 
-		var exitDoorSprite = document.createElement("IMG") ;
-		exitDoorSprite.src = "sprites/exit_door_sprite.png" ;
-
-		var mainBossDoorSprite = document.createElement("IMG") ;
-		mainBossDoorSprite.src = "sprites/main_boss_door_sprite.png" ;
-
-		var mainBossDoor , drawMainBossDoorSprite = false ;
-
-		var exitDoor , drawExitDoorSprite = false ;
-
 
 
 		function doorKey(X,Y) {
@@ -183,11 +168,61 @@
 			this.collected = false ;
 		}
 
+		function dungeonFloorTile (X,Y) {
+			this.x = X ;
+			this.y = Y ;
+			this.width = 100 ;
+			this.height = 100 ;
+		}
 
-		var mainBossDoorKey , drawMainBossDoorKeyImage = false ;
 
-		var mainBossDoorKeyImage = document.createElement("IMG") ;
-		mainBossDoorKeyImage.src = "key.png" ;
+
+
+
+		var mainBossDoorKey = undefined , mainBossDoor = undefined ; 
+
+		var dungeonPillars = undefined , dungeonPillarsCount = undefined ;
+
+		var dungeonPillarsByDefault = undefined , dungeonPillarsByDefaultCount = undefined ;
+
+		var dungeonNewFloorTiles = undefined , dungeonNewFloorTilesCount = undefined ;
+		
+
+		var dungeonWalls = undefined , dungeonWallsCount = undefined ;
+
+        var dungeonUpperBoundaryWallsToBeUnshadowed = undefined , dungeonUpperBoundaryWallsToBeUnshadowedCount = undefined ;
+
+
+		var coins = undefined , coinsCount = undefined ;
+
+
+		// remember camera is fixed to the protagonist, so the entire surrounding moves, so is the overallDisplacement object
+		var overallDisplacement = undefined ;
+
+		// our game's protagonist
+		var protagonistObj = undefined ;
+
+
+
+
+
+		
+
+
+		wallWithoutShadow.onload = function () { drawWallWithoutShadow = true ; }
+
+		wallWithShadow.onload = function () { drawWallWithShadow = true ; }
+		
+		protagonistImage.onload = function () { drawProtagonist = true ; }
+
+		coinRotationSprite.onload = function () { drawCoinRotationSprite = true ; }
+
+		mainBossDoorKeyImage.onload = function () { drawMainBossDoorKeyImage = true ; }
+
+		dungeonFloorTile.onload = function () { drawDungeonfloorTile = true ; }
+
+		dungeonBasicLayout.onload = function () { drawEverything = true ; }
+
 
 		
 
@@ -233,7 +268,7 @@
 			document.addEventListener("keydown" , function (e) {
 
                
-				if (e.key === "s" || e.key === "S") {
+				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false) {
 
 					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "south")) {
 
@@ -318,7 +353,7 @@
 
 
                 
-				if (e.key === "a" || e.key === "A") {
+				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false) {
 
 					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "west")) {
 
@@ -403,7 +438,7 @@
 
 
                 
-				if (e.key === "d" || e.key === "D") {
+				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false) {
 
 					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "east")) {
 
@@ -489,7 +524,7 @@
 
 
                 
-				if (e.key === "w" || e.key === "W") {
+				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false) {
 
 					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "north")) {
 
@@ -653,6 +688,13 @@
 					                mainBossDoor.frameWidth , mainBossDoor.frameHeight ) ;
 			    }
 
+			    for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
+
+					this.cxt.drawImage(dungeonFloorTileImage , dungeonNewFloorTiles[i].x-50+overallDisplacement.x , 
+						                                  dungeonNewFloorTiles[i].y-50+overallDisplacement.y) ;
+					
+				}
+
 			    this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
 				                    protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
 				                    protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
@@ -663,7 +705,7 @@
 				}else{
 					
 
-		            protagonistObj.levelCompletionCutSceneAnimationTimeInterval = setInterval ( function () {
+		            protagonistObj.cutSceneAnimationTimeInterval = setInterval ( function () {
 
 		            	cxt.lineWidth = 10 ;
 		                cxt.strokeStyle = "black" ;
@@ -677,7 +719,8 @@
 		    	        if (protagonistObj.cutSceneAnimationRadius >= protagonistObj.x) {
 		    	 	        cxt.clearRect(0,0,canvas.width,canvas.height) ;
 		    	 	        protagonistObj.stopRequestingFrame = true ;
-		    	            clearInterval(protagonistObj.levelCompletionCutSceneAnimationTimeInterval) ;
+		    	 	        clearInterval(protagonistObj.coinRotationAnimationTimeInterval) ;
+		    	            clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
 		    	        }
 
 		            } , 2000 ) ;
@@ -724,7 +767,7 @@
 
 					  for (var randPillarIndex ; ; ) {
 
-					  	randPillarIndex = Math.floor(100*Math.random()/(100/84)) ;
+					  	randPillarIndex = Math.floor(100*Math.random()/(100/dungeonPillarsCount)) ;
 
 					  	if (dungeonPillars[randPillarIndex].shadowed) {
 					  		mainBossDoor = new door(dungeonPillars[randPillarIndex].x , dungeonPillars[randPillarIndex].y+25) ;
@@ -773,7 +816,44 @@
 
 		function initializeNewLevel () {
 
-	    protagonistObj.levelCompleted = false ;
+
+		mainBossDoorKey = undefined ;
+		mainBossDoor = undefined ;  
+
+
+
+		dungeonPillars = [] ;
+		dungeonPillarsCount = 0 ;
+
+		dungeonPillarsByDefault = [] ;
+		dungeonPillarsByDefaultCount = 0 ;
+
+
+		dungeonNewFloorTiles = [] ;
+		dungeonNewFloorTilesCount = 0 ;
+		
+
+		dungeonWalls = [] ;
+		dungeonWallsCount = 0 ;
+
+        dungeonUpperBoundaryWallsToBeUnshadowed = [] ;
+        dungeonUpperBoundaryWallsToBeUnshadowedCount = 0 ;
+
+
+		coins = [] ;
+		coinsCount = 0 ;
+
+
+		// remember camera is fixed to the protagonist, so the entire surrounding moves, so is the overallDisplacement object
+		overallDisplacement = { x:0 , y:0 } ;
+
+		// our game's protagonist
+		protagonistObj = new protagonist() ;
+
+
+
+
+
 
 
 		for (var i = 0 ; i < 7 ; i++) {
@@ -781,10 +861,30 @@
 
 				dungeonPillars[dungeonPillarsCount] = new pillar( protagonistObj.x+100+j*200 , protagonistObj.y+100+i*200 ) ;
 				dungeonPillarsCount++ ;
+
+				dungeonPillarsByDefault[dungeonPillarsByDefaultCount] = new pillar( protagonistObj.x+100+j*200 , protagonistObj.y+100+i*200 ) ;
+				dungeonPillarsByDefaultCount++ ;
 				
 			}
 			
 		}
+
+
+        /*
+        // im removing few pillars 
+		for (var rowNo = 0; rowNo < 7 ; rowNo++) {
+
+			rand = Math.floor(100*Math.random()/(100/12)) ;
+
+			dungeonNewFloorTiles[rowNo] = new dungeonFloorTile(dungeonPillars[rowNo*11 + rand].x , dungeonPillars[rowNo*11 + rand].y) ; 
+
+			dungeonNewFloorTilesCount ++ ;
+
+			dungeonPillars.splice(rowNo*11 + rand,1) ;
+			dungeonPillarsCount -- ;
+			
+		}*/
+
         
 
         //when the 1st row pillars have nothern walls, corresponding boundary walls should unshadowed as the basic layout has all upper boundary walls shadowed by default.
@@ -911,8 +1011,17 @@
 		    // 0 -> south-east , 1 -> north-east
 
 
-			if (rand == 0) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y+100) ; }
-			if (rand == 1) {mainBossDoorKey = new doorKey(dungeonPillars[randPillarIndex].x+100 , dungeonPillars[randPillarIndex].y-100) ; }
+			if (rand == 0) {
+
+				mainBossDoorKey = new doorKey(dungeonPillarsByDefault[randPillarIndex].x+100 , 
+				                              dungeonPillarsByDefault[randPillarIndex].y+100) ; 
+		    }
+
+			if (rand == 1) {
+
+				mainBossDoorKey = new doorKey(dungeonPillarsByDefault[randPillarIndex].x+100 , 
+				                              dungeonPillarsByDefault[randPillarIndex].y-100) ; 
+		    }
 
 			break ;
 			
@@ -922,7 +1031,7 @@
 
 
         // generating coins like how we did for walls
-		for (var i = 0 , rand ; i < dungeonPillarsCount ; i++) {
+		for (var i = 0 , rand ; i < dungeonPillarsByDefaultCount ; i++) {
 
 
             // each pillar has a coin , it can be in either of the 4 directions (can also be inside the wall)
@@ -934,19 +1043,19 @@
                       	
 			if (rand == 0) {
 
-				coins[coinsCount] = new coin (dungeonPillars[i].x+100 , dungeonPillars[i].y) ;
+				coins[coinsCount] = new coin (dungeonPillarsByDefault[i].x+100 , dungeonPillarsByDefault[i].y) ;
 
 			} else { if (rand == 2) {
 
 				    // avoiding overlapping of present pillar's western coin to the horizontally preceeding pillar's eastern coin
-				    if ( i>0 && coins[coinsCount-1].x == dungeonPillars[i].x-100 ) 
+				    if ( i>0 && coins[coinsCount-1].x == dungeonPillarsByDefault[i].x-100 ) 
 				        {i--; continue;}
 
-					coins[coinsCount] = new coin (dungeonPillars[i].x-100 , dungeonPillars[i].y) ;
+					coins[coinsCount] = new coin (dungeonPillarsByDefault[i].x-100 , dungeonPillarsByDefault[i].y) ;
 
 				} else { if (rand == 1) {
 
-					    coins[coinsCount] = new coin (dungeonPillars[i].x , dungeonPillars[i].y+100) ;
+					    coins[coinsCount] = new coin (dungeonPillarsByDefault[i].x , dungeonPillarsByDefault[i].y+100) ;
 
 				    }
 
@@ -957,11 +1066,11 @@
 				if (i > 11) {
 
 					// avoiding overlapping of present pillar's northern coin to the vertically preceeding pillar's southern coin
-					if ( coins[coinsCount-12].y == dungeonPillars[i].y-100 ) 
+					if ( coins[coinsCount-12].y == dungeonPillarsByDefault[i].y-100 ) 
 					 {i--; continue;}
 
 				} 
-				coins[coinsCount] = new coin(dungeonPillars[i].x , dungeonPillars[i].y-100) ;	    
+				coins[coinsCount] = new coin(dungeonPillarsByDefault[i].x , dungeonPillarsByDefault[i].y-100) ;	    
 			}
 
 			//if (rand == 4) {coins[coinsCount] = new coin (dungeonPillars[i].x , dungeonPillars[i].y) ;}
@@ -977,7 +1086,7 @@
 		
 
 		// now this is the second step of coin generation , in the first step coins are generated only vertically and horizontally but not diagonally
-		for (var i = 0 , rand ; i < dungeonPillarsCount ; i++) {
+		for (var i = 0 , rand ; i < dungeonPillarsByDefaultCount ; i++) {
 
 
             rand = Math.floor(100*Math.random()/50) ; // 0 -> north-east , 1 -> south-west
@@ -988,16 +1097,16 @@
 				if (i > 11) {
 
 					// avoiding overlapping of present pillar's north-eastern coin to the vertically preceeding pillar's horizontally succeeding pillar's south-western coin
-					if ( (coins[coinsCount-12+1].y == dungeonPillars[i].y-100) && (coins[coinsCount-12+1].x == dungeonPillars[i].x+100) ) 
-					    {coins[coinsCount] = new coin(dungeonPillars[i].x-100 , dungeonPillars[i].y+100) ;}//south-western coin
+					if ((coins[coinsCount-12+1].y == dungeonPillarsByDefault[i].y-100) && (coins[coinsCount-12+1].x == dungeonPillarsByDefault[i].x+100)) 
+					    {coins[coinsCount] = new coin(dungeonPillarsByDefault[i].x-100 , dungeonPillarsByDefault[i].y+100) ;}//south-western coin
 					else 
-						{coins[coinsCount] = new coin(dungeonPillars[i].x+100 , dungeonPillars[i].y-100) ;}// north-eastern coin
+						{coins[coinsCount] = new coin(dungeonPillarsByDefault[i].x+100 , dungeonPillarsByDefault[i].y-100) ;}// north-eastern coin
 
-				}else {coins[coinsCount] = new coin(dungeonPillars[i].x+100 , dungeonPillars[i].y-100) ;}// north-eastern coin
+				}else {coins[coinsCount] = new coin(dungeonPillarsByDefault[i].x+100 , dungeonPillarsByDefault[i].y-100) ;}// north-eastern coin
 					    
 			}
 
-			if (rand == 1) {coins[coinsCount] = new coin(dungeonPillars[i].x-100 , dungeonPillars[i].y+100) ;}
+			if (rand == 1) {coins[coinsCount] = new coin(dungeonPillarsByDefault[i].x-100 , dungeonPillarsByDefault[i].y+100) ;}
 
 
 			coinsCount++ ;
@@ -1006,20 +1115,7 @@
 		}
 
 
-
-
-
-		wallWithoutShadow.onload = function () { drawWallWithoutShadow = true ; }
-
-		wallWithShadow.onload = function () { drawWallWithShadow = true ; }
 		
-		protagonistImage.onload = function () { drawProtagonist = true ; }
-
-		coinRotationSprite.onload = function () { drawCoinRotationSprite = true ; }
-
-		mainBossDoorKeyImage.onload = function () { drawMainBossDoorKeyImage = true ; }
-
-
 
 
 
@@ -1027,9 +1123,69 @@
 
 		// should draw the image only after it is loaded
 
-		dungeonBasicLayout.onload = function () {
+		if (drawEverything) {
 
-			var cxt = canvas.getContext("2d") ;
+			drawInitialFrame() ;
+
+		}
+
+
+
+
+
+			protagonistObj.coinRotationAnimationTimeInterval = setInterval(function () {
+
+						    for (var i = 0; i < coinsCount; i++) {
+
+						    	if (coins[i].currentFrameIndex == coins[i].totalAnimationFrames -1 ) {
+							        coins[i].currentFrameIndex = 0 ;
+						            } else { coins[i].currentFrameIndex++ ; }						    	
+						    }
+
+					    },80) ;
+
+
+
+			protagonistObj.cutSceneAnimationTimeInterval = setInterval( function () {
+				cxt.lineWidth = 20 ;
+				cxt.strokeStyle = "black" ;
+
+
+				cxt.clearRect(0,0,canvas.width,canvas.height) ;
+
+				drawInitialFrame() ;
+
+				console.log("cutSceneAnimation called") ;
+
+				for (var i = protagonistObj.cutSceneAnimationRadius ; i <= 850 ; i += 19 ) {				
+				    cxt.beginPath();
+				    cxt.arc(760,370,i,0,2*Math.PI) ;
+				    cxt.stroke() ;	
+				}
+
+				if (protagonistObj.cutSceneAnimationRadius >= 850) {
+					protagonistObj.cutSceneAnimationRadius = 10 ;
+					protagonistObj.cutSceneAnimation = false ;
+					console.log("cutSceneAnimation ended") ;
+					clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
+				}else{protagonistObj.cutSceneAnimationRadius += 19 ;}
+
+			} , 50 ) ;
+
+
+
+			
+
+
+
+		} // end of initializeNewLevel
+
+
+
+
+
+
+		function drawInitialFrame () {
 
 			// drawing the basic dungeon layout
 			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
@@ -1089,6 +1245,15 @@
 
 			}
 
+			if (drawDungeonfloorTile) {
+
+				for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
+
+					cxt.drawImage(dungeonFloorTileImage,dungeonNewFloorTiles[i].x-50,dungeonNewFloorTiles[i].y-50) ;
+					
+				}
+			}
+
 			// drawing the protagonist
 			if (drawProtagonist) {
 				cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
@@ -1097,30 +1262,7 @@
 				               protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
 			}
 
-
 		}
-
-
-
-
-
-			protagonistObj.coinRotationAnimationTimeInterval = setInterval(function () {
-
-						    for (var i = 0; i < coinsCount; i++) {
-
-						    	if (coins[i].currentFrameIndex == coins[i].totalAnimationFrames -1 ) {
-							        coins[i].currentFrameIndex = 0 ;
-						            } else { coins[i].currentFrameIndex++ ; }						    	
-						    }
-
-					    },80) ;
-
-
-			
-
-
-
-		} // end of initializeNewLevel
 
 
 
@@ -1139,17 +1281,26 @@
 
 		function gameLoop() {
 
-			game.update() ;
-
-			game.draw() ;
+			if (!protagonistObj.cutSceneAnimation){
+				game.update() ;			
+			    game.draw() ;
+			}
 			
 			if (!protagonistObj.stopRequestingFrame)
 			{window.requestAnimationFrame(gameLoop) ;}
+		    /*else{
+		        cancelAnimationFrame(myVar);
+
+		    	setTimeout ( function () {
+		    		startNewLevel() ;
+		    	} , 2000 );
+
+		    }*/
 		
 		}
 
 
-        var myVar ;
+		var myVar ;
 
 
 		function startNewLevel () {
@@ -1157,35 +1308,6 @@
 			initializeNewLevel() ;
 			    
 			myVar = window.requestAnimationFrame(gameLoop) ;
-
-
-
-			/*for ( ; protagonistAlive ; ) {
-
-				window.requestAnimationFrame(gameLoop) ;
-
-				if (protagonistAlive) {
-
-					//deletePreviousLevel() ;
-
-					initializeNewLevel() ;
-				}else {
-				    //game over
-			    }
-				
-			}*/
-
-
-			/*if(protagonistAlive) {
-
-				//deletePreviousLevel() ;
-
-				startNewLevel() ;
-
-			}else {
-				//game over
-			}*/
-
 
 			
 		}
