@@ -14,16 +14,43 @@
 </head>
 <body style="background-color: black ;">
 
-	<canvas id="gameCanvas" width ="1520" height = "740"></canvas> 
+	<canvas id="gameCanvas" width ="1520" height = "740" style="cursor: none;" onmousemove="setAimPosition(event)"></canvas> 
 
 	<script type="text/javascript">  //initially draw the basic layout at 610 , 220 i.e top left corner co-ordinates
+		
 		'use strict'
+
+		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
+
+		function mouseAim () {
+			this.x = 100 ;
+			this.y = 100 ;
+			this.frameHeight = 100 ;
+			this.frameWidth = 100 ;
+		}
+
+		var aim = new mouseAim() ;
+
+		var aimImage = document.createElement("IMG") ;
+		aimImage.src = "mouse_aim.png" ;
+
+		var drawAimImage = false ;
+
+
+
+
+		function setAimPosition (e) {
+			aim.x = e.clientX - canvas.offsetLeft ;
+			aim.y = e.clientY - canvas.offsetTop ;
+		}
+
+
+
+
 
 		var dungeonTopBoundary = 320 , dungeonBottomBoundary = 1820 , dungeonLeftBoundary = 710 , dungeonRightBoundary = 3210 ; 
 
 		var level = 1 ;
-
-		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
 
 		//the backgrond image
 		var dungeonBasicLayout = document.createElement("IMG") ;
@@ -56,7 +83,7 @@
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 600 ;
+			this.visionRadius = 600 ; // 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -169,6 +196,7 @@
 			this.x = X ;
 			this.y = Y ;
 			this.collected = false ;
+			this.visible = false ;
 		}
 
 		function dungeonFloorTile (X,Y) {
@@ -223,6 +251,8 @@
 		mainBossDoorKeyImage.onload = function () { drawMainBossDoorKeyImage = true ; }
 
 		dungeonFloorTile.onload = function () { drawDungeonfloorTile = true ; }
+
+		aimImage.onload = function () { drawAimImage = true ; }
 
 		dungeonBasicLayout.onload = function () { drawEverything = true ; }
 
@@ -641,7 +671,8 @@
 			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
 			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
 
-			    //this.cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ;
+			    if (mainBossDoorKey.visible) 
+			    {this.cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ; }
 
 				for (var i = 0; i < coinsCount ; i++) {
 
@@ -706,14 +737,21 @@
 				                    protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
 
 
-			    addDungeonVision() ;
+			    if (protagonistObj.visionRadius){
+			    	addDungeonVision() ;
+			    }
+
+
+			    if (drawAimImage) {
+				this.cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
+			    }
 
 
 
 
+				}
 
-
-				}else{
+				else{
 
 					protagonistObj.cutSceneAnimationRadius = 5 ;
 					protagonistObj.cutSceneAnimation = true ;
@@ -1204,7 +1242,9 @@
 			// drawing the basic dungeon layout
 			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
 
-			//if (drawMainBossDoorKeyImage) {cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;}         	
+			if (drawMainBossDoorKeyImage && mainBossDoorKey.visible == true) {
+				cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;
+			}         	
 
 			if(drawCoinRotationSprite) {
 
@@ -1277,7 +1317,13 @@
 			}
 
 
-			addDungeonVision() ;
+			if(protagonistObj.visionRadius){
+				addDungeonVision() 
+			};
+
+			if (drawAimImage) {
+				cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
+			}
 
 			 
 
