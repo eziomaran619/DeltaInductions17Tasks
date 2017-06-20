@@ -1,4 +1,6 @@
-open game testing.html to test the game a lot faster as the speed of protagonist is increased (so collision wont work, to check collision open actual game.html), ull surf the maze faster, and keys will be visible, so on the whole the tesing process will be a lot easier
+(1) if u want the player to move faster change speed in protagonist constructor, make sure it is less than 100
+(2) if u want the key to be visible, change the visible property to true in doorKey constructor
+(3) if u want to remove the dungeon like vision (fading view) change the visionRadius to false in protagonist constructor
 
 game is not yet complete
 
