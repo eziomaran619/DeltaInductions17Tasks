@@ -21,6 +21,8 @@
 
 		var dungeonTopBoundary = 320 , dungeonBottomBoundary = 1820 , dungeonLeftBoundary = 710 , dungeonRightBoundary = 3210 ; 
 
+		var level = 1 ;
+
 		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
 
 		//the backgrond image
@@ -54,6 +56,7 @@
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
 			this.cutSceneAnimation = true ;
+			this.visionRadius = 600 ;
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -254,6 +257,8 @@
 								protagonistObj.mainBossDoorOpeningSoundFile.play() ;
 
 								protagonistObj.levelCompleted = true ;
+
+								level ++ ;
 							    
 						        } else { mainBossDoor.currentFrameIndex++ ; }
 
@@ -298,7 +303,7 @@
 					
 					
 					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						    protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
+						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
 						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
 						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
 
@@ -555,7 +560,7 @@
 					
 					
 					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						    protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
+						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
 						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
 						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
 
@@ -701,8 +706,17 @@
 				                    protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
 
 
+			    //addDungeonVision() ;
+
+
+
+
+
 
 				}else{
+
+					protagonistObj.cutSceneAnimationRadius = 5 ;
+					protagonistObj.cutSceneAnimation = true ;
 					
 
 		            protagonistObj.cutSceneAnimationTimeInterval = setInterval ( function () {
@@ -716,14 +730,14 @@
 
 		    	        protagonistObj.cutSceneAnimationRadius += 9 ;
 
-		    	        if (protagonistObj.cutSceneAnimationRadius >= protagonistObj.x) {
+		    	        if (protagonistObj.cutSceneAnimationRadius >= 850) {
 		    	 	        cxt.clearRect(0,0,canvas.width,canvas.height) ;
 		    	 	        protagonistObj.stopRequestingFrame = true ;
 		    	 	        clearInterval(protagonistObj.coinRotationAnimationTimeInterval) ;
 		    	            clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
 		    	        }
 
-		            } , 2000 ) ;
+		            } , 30 ) ;
 
 				}
 
@@ -825,8 +839,8 @@
 		dungeonPillars = [] ;
 		dungeonPillarsCount = 0 ;
 
-		dungeonPillarsByDefault = [] ;
-		dungeonPillarsByDefaultCount = 0 ;
+		dungeonPillarsByDefault = [] ;     // i introduced this for the sake of removing pillars
+		dungeonPillarsByDefaultCount = 0 ; // if pillars are not removed this is no diff from dungeonPillars
 
 
 		dungeonNewFloorTiles = [] ;
@@ -871,7 +885,10 @@
 
 
         /*
+
         // im removing few pillars 
+        // just removing is not sufficient, i need to change the shadowed property of appropriate walls and pillars
+
 		for (var rowNo = 0; rowNo < 7 ; rowNo++) {
 
 			rand = Math.floor(100*Math.random()/(100/12)) ;
@@ -1123,7 +1140,7 @@
 
 		// should draw the image only after it is loaded
 
-		if (drawEverything) {
+		if (drawEverything && level == 1) {
 
 			drawInitialFrame() ;
 
@@ -1142,7 +1159,7 @@
 						            } else { coins[i].currentFrameIndex++ ; }						    	
 						    }
 
-					    },80) ;
+					    },70) ;
 
 
 
@@ -1155,8 +1172,6 @@
 
 				drawInitialFrame() ;
 
-				console.log("cutSceneAnimation called") ;
-
 				for (var i = protagonistObj.cutSceneAnimationRadius ; i <= 850 ; i += 19 ) {				
 				    cxt.beginPath();
 				    cxt.arc(760,370,i,0,2*Math.PI) ;
@@ -1166,7 +1181,6 @@
 				if (protagonistObj.cutSceneAnimationRadius >= 850) {
 					protagonistObj.cutSceneAnimationRadius = 10 ;
 					protagonistObj.cutSceneAnimation = false ;
-					console.log("cutSceneAnimation ended") ;
 					clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
 				}else{protagonistObj.cutSceneAnimationRadius += 19 ;}
 
@@ -1262,6 +1276,36 @@
 				               protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
 			}
 
+
+			//addDungeonVision() ;
+
+			 
+
+		}
+
+
+
+
+		function addDungeonVision () {
+
+			cxt.lineWidth = 30 ;
+
+			for (var i = 50 ; i <= protagonistObj.visionRadius ; i += 15) {
+
+			 cxt.strokeStyle = "rgba(0,0,0," + i/protagonistObj.visionRadius + ")" ;
+
+			    cxt.beginPath() ;
+		    	cxt.arc(protagonistObj.x,protagonistObj.y,i,0,2*Math.PI) ;
+		    	cxt.stroke() ;
+			    	
+			}
+
+			cxt.lineWidth = (850 - protagonistObj.visionRadius) ;
+			cxt.strokeStyle = "black" ;
+
+			cxt.beginPath() ;
+		    cxt.arc(protagonistObj.x,protagonistObj.y,protagonistObj.visionRadius + (850 - protagonistObj.visionRadius)/2 ,0,2*Math.PI) ;
+		    cxt.stroke()
 		}
 
 
@@ -1288,14 +1332,14 @@
 			
 			if (!protagonistObj.stopRequestingFrame)
 			{window.requestAnimationFrame(gameLoop) ;}
-		    /*else{
+		    else{
 		        cancelAnimationFrame(myVar);
 
 		    	setTimeout ( function () {
 		    		startNewLevel() ;
 		    	} , 2000 );
 
-		    }*/
+		    }
 		
 		}
 
