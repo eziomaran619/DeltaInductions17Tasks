@@ -77,8 +77,9 @@
 			this.actualHeight = 70 ;
 			this.actualWidth = 40 ;
 			this.direction = "south" ;
-			this.speed = 10 ;
+			this.speed = 5 ;
 			this.collision = {south : false , north : false , east : false , west : false} ;
+			this.keyPressed = {w : false , a : false , s : false , d : false} ;
 			this.movementAnimationTimeInterval ;
 			this.movementAnimationStarted = false ;
 			this.coinRotationAnimationTimeInterval ;
@@ -88,7 +89,7 @@
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 600 ; // 400 to 600 is playable , false -> full visibility
+			this.visionRadius = 400 ; // 400 to 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -281,7 +282,7 @@
 
 					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
 						protagonistObj.x<mainBossDoor.x+50+overallDisplacement.x &&
-					    protagonistObj.y>mainBossDoor.y+75-50+overallDisplacement.y && 
+					    protagonistObj.y>mainBossDoor.y-25+overallDisplacement.y && 
 					    protagonistObj.y<mainBossDoor.y+75+50+overallDisplacement.y) {
 
 						protagonistObj.mainBossDoorKeyClueSoundFile.pause () ;
@@ -324,363 +325,49 @@
                
 				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false) {
 
-					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "south")) {
+					protagonistObj.keyPressed.s = true ;
+					protagonistObj.keyPressed.a = false ;
+					protagonistObj.keyPressed.d = false ;
+					protagonistObj.keyPressed.w = false ;
 
-						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
-					
-					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
-
-						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
-							protagonistObj.currentHorizontalFrameIndex = 1 ;
-						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
-
-					        protagonistObj.footStepsSoundFile.play() ;
-
-						    //overallDisplacement.y -= protagonistObj.speed ;
-
-					    } , 100 ) ;
-
-					    protagonistObj.movementAnimationStarted = true ;
-					    protagonistObj.direction = "south" ;
-					    protagonistObj.currentVerticalFrameIndex = 0 ;
-					}			
-
-
-
-
-                    for (var i = 0; i < dungeonPillarsCount; i++) {
-					
-					
-					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
-						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
-
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonPillars[i].y-50+overallDisplacement.y)  &&
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonPillars[i].y+50+overallDisplacement.y) )  
-
-						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonPillars[i].y - 50) ;
-						        protagonistObj.collision.south = true;
-						        break;}
-
-					    else 	
-
-						    {protagonistObj.collision.south = false;}
-					  
-				    }
-					  
-				
-
-
-
-				    if (!protagonistObj.collision.south) {
-
-                        for (var i = 0; i < dungeonWallsCount; i++) {
-					
-				            if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
-						            protagonistObj.x+protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)    ||  
-						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
-						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
-
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonWalls[i].y-50+overallDisplacement.y)  &&
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonWalls[i].y+50+overallDisplacement.y)   )  
-
-						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonWalls[i].y-50) ;
-						            protagonistObj.collision.south = true;
-						            break;}
-
-					        else 	
-
-						        {protagonistObj.collision.south = false;}
-
-				        }
-
-				        if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y) 
-
-				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
-				        protagonistObj.collision.south = true;}
-
-				    }
 
 					
-					if (!protagonistObj.collision.south)
-					{overallDisplacement.y -= protagonistObj.speed ;}
-					
-
-
-
 				}
 
 
                 
 				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false) {
 
-					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "west")) {
-
-						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
-					
-					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
-
-						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
-							protagonistObj.currentHorizontalFrameIndex = 1 ;
-						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
-
-					        protagonistObj.footStepsSoundFile.play() ;
-
-						    //overallDisplacement.x += protagonistObj.speed ;
-
-					    } , 100 ) ;
-
-					    protagonistObj.movementAnimationStarted = true ;
-					    protagonistObj.direction = "west" ;
-					    protagonistObj.currentVerticalFrameIndex = 1 ;
-					}			
+					protagonistObj.keyPressed.s = false ;
+					protagonistObj.keyPressed.a = true ;
+					protagonistObj.keyPressed.d = false ;
+					protagonistObj.keyPressed.w = false ;			            
 
 
-
- 
-                    for (var i = 0; i < dungeonPillarsCount; i++) {
-					
-					
-					    if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonPillars[i].y+50+overallDisplacement.y    &&   
-						        protagonistObj.y+protagonistObj.actualHeight/2>dungeonPillars[i].y-50+overallDisplacement.y)    ||  
-						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
-						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
-
-				    	        (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  &&
-				    	        (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  )  
-
-						        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonPillars[i].x+50) ;
-						        protagonistObj.collision.west = true;
-						        break;}
-
-					    else 	
-
-						    {protagonistObj.collision.west = false;}
-					  
-				    }
-					  
-				
-
-
-
-				    if (!protagonistObj.collision.west) {
-
-                        for (var i = 0; i < dungeonWallsCount; i++) {
-					
-					
-					        if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonWalls[i].y+50+overallDisplacement.y    &&   
-						            protagonistObj.y+protagonistObj.actualHeight/2>dungeonWalls[i].y-50+overallDisplacement.y)    ||  
-						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
-						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
-
-				    	            (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)  &&
-				    	            (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   )  
-
-						            {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonWalls[i].x+50) ;
-						            protagonistObj.collision.west = true;
-						            break;}
-
-					        else 	
-
-						        {protagonistObj.collision.west = false;}
-					  
-				        }
-
-				        if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x) 
-
-				        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
-				        protagonistObj.collision.west = true;}
-
-				    }
-                    
-
-
-
-
-					if (!protagonistObj.collision.west)
-					{overallDisplacement.x += protagonistObj.speed ;}
 				}
 
 
                 
 				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false) {
 
-					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "east")) {
+					protagonistObj.keyPressed.s = false ;
+					protagonistObj.keyPressed.a = false ;
+					protagonistObj.keyPressed.d = true ;
+					protagonistObj.keyPressed.w = false ;
 
-						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
 					
-					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
-
-						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
-							protagonistObj.currentHorizontalFrameIndex = 1 ;
-						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
-
-					        protagonistObj.footStepsSoundFile.play() ;
-  
-						    //overallDisplacement.x -= protagonistObj.speed ;
-
-					    } , 100 ) ;
-
-					    protagonistObj.movementAnimationStarted = true ;
-					    protagonistObj.direction = "east" ;
-					    protagonistObj.currentVerticalFrameIndex = 2 ;
-					}		
-
-
-
-
-
-                for (var i = 0; i < dungeonPillarsCount; i++) {
-					
-					
-					    if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonPillars[i].y+50+overallDisplacement.y    &&   
-						        protagonistObj.y+protagonistObj.actualHeight/2>dungeonPillars[i].y-50+overallDisplacement.y)    ||  
-						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
-						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
-
-				    	        (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  && 
-				    	        (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  )  
-
-						        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonPillars[i].x-50) ;
-						        protagonistObj.collision.east = true;
-						        break;}
-
-					    else 	
-
-						    {protagonistObj.collision.east = false;}
-					  
-				    }
-					  
-				
-
-
-
-				    if (!protagonistObj.collision.east) {
-
-                        for (var i = 0; i < dungeonWallsCount; i++) {
-					
-					
-					        if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonWalls[i].y+50+overallDisplacement.y    &&   
-						            protagonistObj.y+protagonistObj.actualHeight/2>dungeonWalls[i].y-50+overallDisplacement.y)    ||  
-						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
-						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
-
-				    	            (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   &&
-				    	            (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)   )  
-
-						            {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonWalls[i].x-50) ;
-						            protagonistObj.collision.east = true;
-						            break;}
-
-					        else 	
-
-						        {protagonistObj.collision.east = false;}
-					  
-				        }
-
-				        if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
-				        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
-				        protagonistObj.collision.east = true;}
-
-				    }
-
-
-
-
-
-					if (!protagonistObj.collision.east)
-					{overallDisplacement.x -= protagonistObj.speed ;}
 				}
 
 
                 
 				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false) {
 
-					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "north")) {
+					protagonistObj.keyPressed.s = false ;
+					protagonistObj.keyPressed.a = false ;
+					protagonistObj.keyPressed.d = false ;
+					protagonistObj.keyPressed.w = true ;
 
-						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
-					
-					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
-
-						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
-							protagonistObj.currentHorizontalFrameIndex = 1 ;
-						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
-
-					        protagonistObj.footStepsSoundFile.play() ;
-
-						    //overallDisplacement.y += protagonistObj.speed ;
-
-					    } , 100 ) ;
-
-					    protagonistObj.movementAnimationStarted = true ;
-					    protagonistObj.direction = "north" ;
-					    protagonistObj.currentVerticalFrameIndex = 3 ;
-
-					}		
-
-
-
-
-                    for (var i = 0; i < dungeonPillarsCount; i++) {
-					
-					
-					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
-						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
-						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
-
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonPillars[i].y+50+overallDisplacement.y)  &&  
-				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonPillars[i].y-50+overallDisplacement.y) )  
-
-						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonPillars[i].y + 50) ;
-						        protagonistObj.collision.north = true;
-						        break;}
-
-					    else 	
-
-						    {protagonistObj.collision.north = false;}
-					  
-				    }
-					  
-				
-
-
-
-				    if (!protagonistObj.collision.north) {
-
-                        for (var i = 0; i < dungeonWallsCount; i++) {
-					
-				            if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
-						            protagonistObj.x+protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)    ||  
-						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
-						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
-
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonWalls[i].y+50+overallDisplacement.y)  &&  
-				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonWalls[i].y-50+overallDisplacement.y) )  
-
-						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonWalls[i].y + 50) ;
-						            protagonistObj.collision.north = true;
-						            break;}
-
-					        else 	
-
-						        {protagonistObj.collision.north = false;}
-
-				        }
-
-				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
-				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
-				        protagonistObj.collision.north = true;}
-
-				    }
-
-
-
-
-
-					if (!protagonistObj.collision.north)
-					{overallDisplacement.y += protagonistObj.speed ;}
+								    
 				}
 
 
@@ -689,13 +376,26 @@
 
 
 
-			document.addEventListener("keyup" , function () {
+			document.addEventListener("keyup" , function (e) {
 
 				clearInterval(protagonistObj.movementAnimationTimeInterval) ;
 				protagonistObj.currentHorizontalFrameIndex = 0 ;
 				protagonistObj.movementAnimationStarted = false ;
 				protagonistObj.footStepsSoundFile.pause() ;
 				protagonistObj.footStepsSoundFile.load() ;
+
+				if (e.key == 's' || e.key == 'S') {
+					protagonistObj.keyPressed.s = false ;
+				}
+				if (e.key == 'w' || e.key == 'W') {
+					protagonistObj.keyPressed.w = false ;
+				}
+				if (e.key == 'd' || e.key == 'D') {
+					protagonistObj.keyPressed.d = false ;
+				}
+				if (e.key == 'a' || e.key == 'A') {
+					protagonistObj.keyPressed.a = false ;
+				}
 
 			} ) ; 
 
@@ -825,6 +525,7 @@
 
 				}
 
+
 				if (displayInstructions) {
 					this.cxt.drawImage(instructions , 0 , 0 ) ;
 				}
@@ -837,6 +538,381 @@
 
 
 			this.update = function () {
+
+
+
+				if (protagonistObj.keyPressed.w == true) {
+
+
+					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "north")) {
+
+						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
+					
+					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 1 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
+
+					    } , 100 ) ;
+
+					    protagonistObj.movementAnimationStarted = true ;
+					    protagonistObj.direction = "north" ;
+					    protagonistObj.currentVerticalFrameIndex = 3 ;
+
+					}		
+
+
+
+
+
+					if (!protagonistObj.collision.north)
+					{overallDisplacement.y += protagonistObj.speed ;}
+
+
+
+
+                    for (var i = 0; i < dungeonPillarsCount; i++) {
+					
+					
+					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
+						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
+						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
+						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
+
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonPillars[i].y+50+overallDisplacement.y)  &&  
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonPillars[i].y-50+overallDisplacement.y) )  
+
+						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonPillars[i].y + 50) ;
+						        protagonistObj.collision.north = true;
+						        break;}
+
+					    else 	
+
+						    {protagonistObj.collision.north = false;}
+					  
+				    }
+					  
+				
+
+
+
+				    if (!protagonistObj.collision.north) {
+
+                        for (var i = 0; i < dungeonWallsCount; i++) {
+					
+				            if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
+						            protagonistObj.x+protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)    ||  
+						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
+						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
+
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonWalls[i].y+50+overallDisplacement.y)  &&  
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2-20 >= dungeonWalls[i].y-50+overallDisplacement.y) )  
+
+						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2-20 - (dungeonWalls[i].y + 50) ;
+						            protagonistObj.collision.north = true;
+						            break;}
+
+					        else 	
+
+						        {protagonistObj.collision.north = false;}
+
+				        }
+
+				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
+				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
+				        protagonistObj.collision.north = true;}
+
+				    }
+
+
+
+
+				}
+
+
+				if (protagonistObj.keyPressed.d == true) {
+
+
+					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "east")) {
+
+						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
+					
+					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 1 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
+
+					    } , 100 ) ;
+
+					    protagonistObj.movementAnimationStarted = true ;
+					    protagonistObj.direction = "east" ;
+					    protagonistObj.currentVerticalFrameIndex = 2 ;
+					}		
+
+
+
+
+
+					if (!protagonistObj.collision.east)
+					{overallDisplacement.x -= protagonistObj.speed ;}
+
+
+
+
+
+                for (var i = 0; i < dungeonPillarsCount; i++) {
+					
+					
+					    if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonPillars[i].y+50+overallDisplacement.y    &&   
+						        protagonistObj.y+protagonistObj.actualHeight/2>dungeonPillars[i].y-50+overallDisplacement.y)    ||  
+						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
+						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
+
+				    	        (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  && 
+				    	        (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  )  
+
+						        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonPillars[i].x-50) ;
+						        protagonistObj.collision.east = true;
+						        break;}
+
+					    else 	
+
+						    {protagonistObj.collision.east = false;}
+					  
+				    }
+					  
+				
+
+
+
+				    if (!protagonistObj.collision.east) {
+
+                        for (var i = 0; i < dungeonWallsCount; i++) {
+					
+					
+					        if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonWalls[i].y+50+overallDisplacement.y    &&   
+						            protagonistObj.y+protagonistObj.actualHeight/2>dungeonWalls[i].y-50+overallDisplacement.y)    ||  
+						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
+						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
+
+				    	            (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   &&
+				    	            (protagonistObj.x+protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)   )  
+
+						            {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonWalls[i].x-50) ;
+						            protagonistObj.collision.east = true;
+						            break;}
+
+					        else 	
+
+						        {protagonistObj.collision.east = false;}
+					  
+				        }
+
+				        if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
+				        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
+				        protagonistObj.collision.east = true;}
+
+				    }
+
+
+
+
+				}
+
+
+				if (protagonistObj.keyPressed.a == true) {
+
+
+
+					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "west")) {
+
+						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
+					
+					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 1 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
+
+					    } , 100 ) ;
+
+					    protagonistObj.movementAnimationStarted = true ;
+					    protagonistObj.direction = "west" ;
+					    protagonistObj.currentVerticalFrameIndex = 1 ;
+					}			
+
+
+
+
+					if (!protagonistObj.collision.west)
+					{overallDisplacement.x += protagonistObj.speed ;}
+
+
+
+ 
+                    for (var i = 0; i < dungeonPillarsCount; i++) {
+					
+					
+					    if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonPillars[i].y+50+overallDisplacement.y    &&   
+						        protagonistObj.y+protagonistObj.actualHeight/2>dungeonPillars[i].y-50+overallDisplacement.y)    ||  
+						        (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonPillars[i].y+50+overallDisplacement.y    &&   
+						        protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonPillars[i].y-50+overallDisplacement.y)  )    &&
+
+				    	        (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonPillars[i].x+50+overallDisplacement.x)  &&
+				    	        (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonPillars[i].x-50+overallDisplacement.x)  )  
+
+						        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonPillars[i].x+50) ;
+						        protagonistObj.collision.west = true;
+						        break;}
+
+					    else 	
+
+						    {protagonistObj.collision.west = false;}
+					  
+				    }
+					  
+				
+
+
+
+				    if (!protagonistObj.collision.west) {
+
+                        for (var i = 0; i < dungeonWallsCount; i++) {
+					
+					
+					        if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonWalls[i].y+50+overallDisplacement.y    &&   
+						            protagonistObj.y+protagonistObj.actualHeight/2>dungeonWalls[i].y-50+overallDisplacement.y)    ||  
+						            (protagonistObj.y+protagonistObj.actualHeight/2-20<dungeonWalls[i].y+50+overallDisplacement.y    &&   
+						            protagonistObj.y+protagonistObj.actualHeight/2-20>dungeonWalls[i].y-50+overallDisplacement.y)  )    &&
+
+				    	            (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonWalls[i].x+50+overallDisplacement.x)  &&
+				    	            (protagonistObj.x-protagonistObj.actualWidth/2 >= dungeonWalls[i].x-50+overallDisplacement.x)   )  
+
+						            {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - (dungeonWalls[i].x+50) ;
+						            protagonistObj.collision.west = true;
+						            break;}
+
+					        else 	
+
+						        {protagonistObj.collision.west = false;}
+					  
+				        }
+
+				        if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x) 
+
+				        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
+				        protagonistObj.collision.west = true;}
+
+				    }
+
+
+					
+				}
+
+
+				if (protagonistObj.keyPressed.s == true) {
+
+
+
+					if (!(protagonistObj.movementAnimationStarted == true && protagonistObj.direction == "south")) {
+
+						clearInterval(protagonistObj.movementAnimationTimeInterval) ;
+					
+					    protagonistObj.movementAnimationTimeInterval = setInterval ( function () {
+
+						    if (protagonistObj.currentHorizontalFrameIndex == protagonistObj.totalAnimationFrames -1 ) {
+							protagonistObj.currentHorizontalFrameIndex = 1 ;
+						    } else { protagonistObj.currentHorizontalFrameIndex++ ; }
+
+					        protagonistObj.footStepsSoundFile.play() ;
+
+					    } , 100 ) ;
+
+					    protagonistObj.movementAnimationStarted = true ;
+					    protagonistObj.direction = "south" ;
+					    protagonistObj.currentVerticalFrameIndex = 0 ;
+					}			
+
+					
+					if (!protagonistObj.collision.south)
+					{overallDisplacement.y -= protagonistObj.speed ;}
+					
+
+
+
+
+                    for (var i = 0; i < dungeonPillarsCount; i++) {
+					
+					
+					    if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
+						        protagonistObj.x+protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)    ||  
+						        (protagonistObj.x-protagonistObj.actualWidth/2<dungeonPillars[i].x+50+overallDisplacement.x    &&   
+						        protagonistObj.x-protagonistObj.actualWidth/2>dungeonPillars[i].x-50+overallDisplacement.x)  )    &&
+
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonPillars[i].y-50+overallDisplacement.y)  &&
+				    	        (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonPillars[i].y+50+overallDisplacement.y) )  
+
+						        {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonPillars[i].y - 50) ;
+						        protagonistObj.collision.south = true;
+						        break;}
+
+					    else 	
+
+						    {protagonistObj.collision.south = false;}
+					  
+				    }
+					  
+				
+
+
+
+				    if (!protagonistObj.collision.south) {
+
+                        for (var i = 0; i < dungeonWallsCount; i++) {
+					
+				            if (  ( (protagonistObj.x+protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
+						            protagonistObj.x+protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)    ||  
+						            (protagonistObj.x-protagonistObj.actualWidth/2<dungeonWalls[i].x+50+overallDisplacement.x    &&   
+						            protagonistObj.x-protagonistObj.actualWidth/2>dungeonWalls[i].x-50+overallDisplacement.x)  )    &&
+
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonWalls[i].y-50+overallDisplacement.y)  &&
+				    	            (protagonistObj.y+protagonistObj.actualHeight/2 <= dungeonWalls[i].y+50+overallDisplacement.y)   )  
+
+						            {overallDisplacement.y = protagonistObj.y + protagonistObj.actualHeight/2 - (dungeonWalls[i].y-50) ;
+						            protagonistObj.collision.south = true;
+						            break;}
+
+					        else 	
+
+						        {protagonistObj.collision.south = false;}
+
+				        }
+
+				        if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y) 
+
+				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
+				        protagonistObj.collision.south = true;}
+
+				    }
+
+
+
+					
+				}
+
+
+
+
+
+
 
 
 				for (var i = 0; i < coinsCount ; i++) {
@@ -857,6 +933,10 @@
 						  break; }
 					
 				}
+
+
+
+
 
                 
                 if (!mainBossDoorKey.collected)
