@@ -95,7 +95,7 @@
 			this.levelCompleted = false ;
 			this.gameOver = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 500 ; // 400 to 600 is playable , false -> full visibility
+			this.visionRadius = 400 ; // 400 to 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -107,12 +107,14 @@
 
 			this.mainBossDoorKeyCollectionSoundFile = document.createElement("AUDIO") ;
 			this.mainBossDoorKeyCollectionSoundFile.src = "sound_files/magic_chime_on_collecting_the_keys.mp3" ;
+			this.mainBossDoorKeyCollectionSoundFile.volume = 0.5 ;
 
 			this.mainBossDoorKeyClueSoundFile = document.createElement("AUDIO") ;
 			this.mainBossDoorKeyClueSoundFile.src = "sound_files/main_boss_door_key_sound_clue.mp3" ;
 
 			this.mainBossDoorOpeningSoundFile = document.createElement("AUDIO") ;
 			this.mainBossDoorOpeningSoundFile.src = "sound_files/azumanga_on_finishing_level.mp3" ;
+			this.mainBossDoorOpeningSoundFile.volume = 0.5 ;
 			
 		}
 
@@ -229,20 +231,20 @@
 			this.frameWidth = 626/10 ;
 			this.frameHeight = 88 ;
 			this.minutes = 2 ;
-			this.seconds = 59 ;
+			this.seconds = 30 ;
 			this.timeInterval ;
 
 			this.timeOutSoundFile = document.createElement("AUDIO") ;
 			this.timeOutSoundFile.src = "sound_files/time out air horn.mp3" ;
-			this.timeOutSoundFile.volume = 0.3 ;
+			this.timeOutSoundFile.volume = 0.2 ;
 
 			this.lastFewSecondsCountdownSoundFile = document.createElement("AUDIO") ;
 			this.lastFewSecondsCountdownSoundFile.src = "sound_files/last few seconds countdown sound.mp3" ;
-			this.lastFewSecondsCountdownSoundFile.volume = 0.05 ;
+			this.lastFewSecondsCountdownSoundFile.volume = 0.03 ;
 
 			this.countdownMinuteReminderSoundFile = document.createElement("AUDIO") ;
 			this.countdownMinuteReminderSoundFile.src = "sound_files/metal gong sound.mp3" ;
-			this.countdownMinuteReminderSoundFile.volume = 0.07 ;
+			this.countdownMinuteReminderSoundFile.volume = 0.04 ;
 		}
 
         
@@ -1452,7 +1454,10 @@
 
 				        }else{gameCountdown.seconds -- ;}
 
-				        if (gameCountdown.seconds <= 10 && gameCountdown.minutes == 0) {
+				        if (gameCountdown.seconds == 30 && gameCountdown.minutes == 0) 
+				        	{gameCountdown.countdownMinuteReminderSoundFile.play() ;}
+
+				        if (gameCountdown.seconds <= 15 && gameCountdown.minutes == 0) {
 				        	    gameCountdown.lastFewSecondsCountdownSoundFile.load() ;
 					        	gameCountdown.lastFewSecondsCountdownSoundFile.play() ;
 					        }
