@@ -20,6 +20,9 @@
 		
 		'use strict'
 
+		var readInstructions = document.createElement("IMG") ;
+		readInstructions.src = "read instructions tip.png" ;
+
 		var displayInstructions = false ;
 
 		var instructions = document.createElement("IMG") ;
@@ -67,15 +70,19 @@
 		function protagonist () {
 			this.x = 760 ;
 			this.y = 370 ;
-			this.type = "intelligent" ;
-			this.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
+			this.type = "professor" ;
+			this.totalAnimationFrames = 9 ; // refers to horizontal or vertical depending on the character
 			this.currentHorizontalFrameIndex = 0 ;
-			this.currentVerticalFrameIndex = 0 ;
+			this.currentVerticalFrameIndex = 2 ;
+			this.southMovementVerticalFrameIndex = 2 ;
+			this.westMovementVerticalFrameIndex = 1 ;
+			this.eastMovementVerticalFrameIndex = 3 ;
+			this.northMovementVerticalFrameIndex = 0 ;
 			this.spriteAnimation = "horizontal" ;
-			this.frameHeight = 70 ;
-			this.frameWidth = 70 ;
-			this.actualHeight = 70 ;
-			this.actualWidth = 40 ;
+			this.frameHeight = 64 ;
+			this.frameWidth = 64 ;
+			this.actualHeight = 64 ;
+			this.actualWidth = 30 ;
 			this.direction = "south" ;
 			this.speed = 5 ;
 			this.collision = {south : false , north : false , east : false , west : false} ;
@@ -115,7 +122,7 @@
 
 		// protagonist image
 		var protagonistImage = document.createElement("IMG") ;
-		protagonistImage.src = "character_sprites/protagonist_movement_sprite.png" ;
+		protagonistImage.src = "character_sprites/professor_movement_sprite.png" ;
 		
 		// wall with shadow image
 		var wallWithShadow = document.createElement("IMG") ;
@@ -465,12 +472,13 @@
 					                mainBossDoor.frameWidth , mainBossDoor.frameHeight ) ;
 			    }
 
-			    for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
+			    /*for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
 
 					this.cxt.drawImage(dungeonFloorTileImage , dungeonNewFloorTiles[i].x-50+overallDisplacement.x , 
 						                                  dungeonNewFloorTiles[i].y-50+overallDisplacement.y) ;
 					
-				}
+				}*/
+
 
 			    this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
 				                    protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
@@ -486,6 +494,8 @@
 			    if (drawAimImage) {
 				this.cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
 			    }
+
+			    this.cxt.drawImage(readInstructions , 0 , 0 ) ;
 
 
 
@@ -560,7 +570,7 @@
 
 					    protagonistObj.movementAnimationStarted = true ;
 					    protagonistObj.direction = "north" ;
-					    protagonistObj.currentVerticalFrameIndex = 3 ;
+					    protagonistObj.currentVerticalFrameIndex = protagonistObj.northMovementVerticalFrameIndex ;
 
 					}		
 
@@ -652,7 +662,7 @@
 
 					    protagonistObj.movementAnimationStarted = true ;
 					    protagonistObj.direction = "east" ;
-					    protagonistObj.currentVerticalFrameIndex = 2 ;
+					    protagonistObj.currentVerticalFrameIndex = protagonistObj.eastMovementVerticalFrameIndex ;
 					}		
 
 
@@ -746,7 +756,7 @@
 
 					    protagonistObj.movementAnimationStarted = true ;
 					    protagonistObj.direction = "west" ;
-					    protagonistObj.currentVerticalFrameIndex = 1 ;
+					    protagonistObj.currentVerticalFrameIndex = protagonistObj.westMovementVerticalFrameIndex ;
 					}			
 
 
@@ -838,7 +848,7 @@
 
 					    protagonistObj.movementAnimationStarted = true ;
 					    protagonistObj.direction = "south" ;
-					    protagonistObj.currentVerticalFrameIndex = 0 ;
+					    protagonistObj.currentVerticalFrameIndex = protagonistObj.southMovementVerticalFrameIndex ;
 					}			
 
 					
@@ -1462,14 +1472,14 @@
 
 			}
 
-			if (drawDungeonfloorTile) {
+			/*if (drawDungeonfloorTile) {
 
 				for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
 
 					cxt.drawImage(dungeonFloorTileImage,dungeonNewFloorTiles[i].x-50,dungeonNewFloorTiles[i].y-50) ;
 					
 				}
-			}
+			}*/
 
 			// drawing the protagonist
 			if (drawProtagonist) {
