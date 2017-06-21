@@ -42,8 +42,6 @@
 		var aimImage = document.createElement("IMG") ;
 		aimImage.src = "mouse_aim.png" ;
 
-		var drawAimImage = false ;
-
 
 
 
@@ -95,8 +93,9 @@
 			this.cutSceneAnimationRadius = 5 ;
 			this.stopRequestingFrame = false ;
 			this.levelCompleted = false ;
+			this.gameOver = false ;
 			this.cutSceneAnimation = true ;
-			this.visionRadius = 400 ; // 400 to 600 is playable , false -> full visibility
+			this.visionRadius = 500 ; // 400 to 600 is playable , false -> full visibility
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -117,9 +116,6 @@
 			
 		}
 
-		// to avoid background being drawn over the other images as loading background image takes longer time due to bigger size
-		var drawProtagonist = false , drawWallWithShadow = false , drawWallWithoutShadow = false ;
-
 		// protagonist image
 		var protagonistImage = document.createElement("IMG") ;
 		protagonistImage.src = "character_sprites/professor_movement_sprite.png" ;
@@ -133,10 +129,6 @@
 		wallWithoutShadow.src = "wall_without_shadow.png" ;
 
 
-
-		var drawCoinRotationSprite = false , drawMainBossDoorKeyImage = false ;
-
-
         var coinRotationSprite = document.createElement("IMG") ;
 		coinRotationSprite.src = "sprites/rotating_coin_sprite.png" ;		
 
@@ -145,6 +137,12 @@
 
 		var mainBossDoorSprite = document.createElement("IMG") ;
 		mainBossDoorSprite.src = "sprites/main_boss_door_sprite.png" ;
+
+		var healthBarSprite = document.createElement("IMG") ;
+		healthBarSprite.src = "sprites/health_bar_sprite.png" ;
+
+		var numbersSprite = document.createElement("IMG") ;
+		numbersSprite.src = "numbers.png" ;
 
 		//var drawDungeonfloorTile = false ;
 
@@ -219,9 +217,26 @@
 			this.height = 100 ;
 		}
 
+		function bar () {
+			this.frameWidth = 168 ;
+			this.frameHeight = 100 ;
+			this.x = canvas.width - this.frameWidth ;
+			this.y = 0 ;
+			this.currentFrameIndex = 0 ;
+		}
 
+		function countdown () {			
+			this.frameWidth = 626/10 ;
+			this.frameHeight = 88 ;
+			this.minutes = 3 ;
+			this.seconds = 0 ;
+			this.timeInterval ;
+		}
 
+        
+        var gameCountdown = undefined ;
 
+        var healthBar = undefined ;
 
 		var mainBossDoorKey = undefined , mainBossDoor = undefined ; 
 
@@ -236,7 +251,6 @@
 
         var dungeonUpperBoundaryWallsToBeUnshadowed = undefined , dungeonUpperBoundaryWallsToBeUnshadowedCount = undefined ;
 
-
 		var coins = undefined , coinsCount = undefined ;
 
 
@@ -250,22 +264,6 @@
 
 
 
-		
-
-
-		wallWithoutShadow.onload = function () { drawWallWithoutShadow = true ; }
-
-		wallWithShadow.onload = function () { drawWallWithShadow = true ; }
-		
-		protagonistImage.onload = function () { drawProtagonist = true ; }
-
-		coinRotationSprite.onload = function () { drawCoinRotationSprite = true ; }
-
-		mainBossDoorKeyImage.onload = function () { drawMainBossDoorKeyImage = true ; }
-
-		dungeonFloorTile.onload = function () { drawDungeonfloorTile = true ; }
-
-		aimImage.onload = function () { drawAimImage = true ; }
 
 		dungeonBasicLayout.onload = function () { drawEverything = true ; }
 
@@ -410,7 +408,7 @@
 
 			this.draw = function () {
 
-				if (!protagonistObj.levelCompleted) {
+				if (protagonistObj.levelCompleted == false && protagonistObj.gameOver == false) {
 
 
 
@@ -490,10 +488,27 @@
 			    	addDungeonVision() ;
 			    }
 
+			    this.cxt.drawImage( healthBarSprite , healthBar.frameWidth*healthBar.currentFrameIndex , 
+				                    0 , healthBar.frameWidth , healthBar.frameHeight , healthBar.x , 
+				                    healthBar.y , healthBar.frameWidth , healthBar.frameHeight ) ;
 
-			    if (drawAimImage) {
+			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*gameCountdown.minutes ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x - gameCountdown.frameWidth - 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(Math.floor(gameCountdown.seconds/10)) ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(gameCountdown.seconds%10) ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + gameCountdown.frameWidth + 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+
+
+			    
 				this.cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
-			    }
+			    
 
 			    this.cxt.drawImage(readInstructions , 0 , 0 ) ;
 
@@ -504,7 +519,8 @@
 
 				else{
 
-					if (mainBossDoor.currentFrameIndex == mainBossDoor.totalAnimationFrames -1) {
+					if ((protagonistObj.levelCompleted == true && mainBossDoor.currentFrameIndex == mainBossDoor.totalAnimationFrames -1) || 
+						 protagonistObj.gameOver == true) {
 
 						protagonistObj.cutSceneAnimationRadius = 5 ;
 					    protagonistObj.cutSceneAnimation = true ;
@@ -526,6 +542,7 @@
 		    	 	            protagonistObj.stopRequestingFrame = true ;
 		    	 	            clearInterval(protagonistObj.coinRotationAnimationTimeInterval) ;
 		    	                clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
+		    	                clearInterval(gameCountdown.timeInterval) ;
 		    	            }
 
 		                } , 30 ) ;
@@ -976,7 +993,7 @@
 				    }
 
 
-				if (!mainBossDoorKey.collected) {
+				if (!mainBossDoorKey.collected && !protagonistObj.gameOver) {
 
 					if (  (50/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoorKey.x + overallDisplacement.x),2) + 
 							   Math.pow(protagonistObj.y-(mainBossDoorKey.y + overallDisplacement.y),2)))   >=1  ) 
@@ -996,7 +1013,7 @@
 					protagonistObj.mainBossDoorKeyClueSoundFile.play() ;
 				}
 				else{
-					if (mainBossDoor.currentFrameIndex == 0) {
+					if ( !protagonistObj.gameOver && mainBossDoor.currentFrameIndex == 0) {
 
 						if (  (30/Math.sqrt(Math.pow(protagonistObj.x-(mainBossDoor.x + overallDisplacement.x),2) + 
 							   Math.pow(protagonistObj.y-(mainBossDoor.y + overallDisplacement.y),2)))   >=1  ) 
@@ -1045,7 +1062,7 @@
 		mainBossDoorKey = undefined ;
 		mainBossDoor = undefined ;  
 
-
+        
 
 		dungeonPillars = [] ;
 		dungeonPillarsCount = 0 ;
@@ -1074,6 +1091,10 @@
 
 		// our game's protagonist
 		protagonistObj = new protagonist() ;
+
+		healthBar = new bar() ;
+
+		gameCountdown = new countdown () ;
 
 
 
@@ -1390,12 +1411,41 @@
 				}
 
 				if (protagonistObj.cutSceneAnimationRadius >= 850) {
+
+
 					protagonistObj.cutSceneAnimationRadius = 10 ;
 					protagonistObj.cutSceneAnimation = false ;
+
+
+
+			        gameCountdown.timeInterval = setInterval( function () {
+
+				        if (gameCountdown.seconds == 0) {
+
+					        if (gameCountdown.minutes == 0) {
+					        	protagonistObj.mainBossDoorKeyClueSoundFile.load() ;
+					        	protagonistObj.mainBossDoorKeyClueSoundFile.pause() ;
+						        clearInterval(gameCountdown.timeInterval) ; 
+						        protagonistObj.gameOver = true ;
+					        }else{gameCountdown.minutes -- ;}
+
+					        gameCountdown.seconds = 59 ;
+
+				        }else{gameCountdown.seconds -- ;}
+
+			        }, 950 ) ;
+
+
+
 					clearInterval(protagonistObj.cutSceneAnimationTimeInterval) ;
+
+
 				}else{protagonistObj.cutSceneAnimationRadius += 19 ;}
 
 			} , 50 ) ;
+
+
+
 
 
 
@@ -1415,62 +1465,62 @@
 			// drawing the basic dungeon layout
 			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
 
-			if (drawMainBossDoorKeyImage && mainBossDoorKey.visible == true) {
+			if (mainBossDoorKey.visible) {
 				cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;
 			}         	
 
-			if(drawCoinRotationSprite) {
+			
 
-				for (var i = 0; i < coinsCount ; i++) {
+			for (var i = 0; i < coinsCount ; i++) {
 
-					cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 
-				                   0 , coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2 , 
-				                   coins[i].y - coins[i].frameHeight/2 , coins[i].frameWidth , coins[i].frameHeight ) ;					
-				}
-
+				cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 
+				               0 , coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2 , 
+				               coins[i].y - coins[i].frameHeight/2 , coins[i].frameWidth , coins[i].frameHeight ) ;					
 			}
 
+			
 
-			if (drawWallWithShadow) {
+
+			
 
 				// drawing walls with shadow
-				for (var i = 0; i < dungeonWallsCount ; i++) {
+			for (var i = 0; i < dungeonWallsCount ; i++) {
 
-					if (dungeonWalls[i].shadowed) {
+				if (dungeonWalls[i].shadowed) {
 
-						cxt.drawImage(wallWithShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
-					}					
-				}
+					cxt.drawImage(wallWithShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
+				}					
+			}
+			
+
+			
+
+			// drawing walls with no shadow
+			for (var i = 0; i < dungeonWallsCount ; i++) {
+
+				if (!dungeonWalls[i].shadowed) {
+
+					cxt.drawImage(wallWithoutShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
+				}					
 			}
 
-			if (drawWallWithoutShadow) {
+			// updating the pillars with no shadow
+			for (var i = 0; i < dungeonPillarsCount ; i++) {
 
-				// drawing walls with no shadow
-				for (var i = 0; i < dungeonWallsCount ; i++) {
+				if (!dungeonPillars[i].shadowed) {
 
-					if (!dungeonWalls[i].shadowed) {
-
-						cxt.drawImage(wallWithoutShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
-					}					
-				}
-
-				// updating the pillars with no shadow
-				for (var i = 0; i < dungeonPillarsCount ; i++) {
-
-					if (!dungeonPillars[i].shadowed) {
-
-						cxt.drawImage(wallWithoutShadow,dungeonPillars[i].x-50,dungeonPillars[i].y-50) ;
-					}					
-				}
-
-				// updating the dungeon's upper boundary walls with no shadow
-				for (var i = 0; i < dungeonUpperBoundaryWallsToBeUnshadowedCount ; i++) {
-
-					cxt.drawImage(wallWithoutShadow,dungeonUpperBoundaryWallsToBeUnshadowed[i].x-50 , 
-						                            dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50) ;		                              					
-				}
-
+					cxt.drawImage(wallWithoutShadow,dungeonPillars[i].x-50,dungeonPillars[i].y-50) ;
+				}					
 			}
+
+			// updating the dungeon's upper boundary walls with no shadow
+			for (var i = 0; i < dungeonUpperBoundaryWallsToBeUnshadowedCount ; i++) {
+
+				cxt.drawImage(wallWithoutShadow,dungeonUpperBoundaryWallsToBeUnshadowed[i].x-50 , 
+						      dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50) ;		                              					
+			}
+
+			
 
 			/*if (drawDungeonfloorTile) {
 
@@ -1482,25 +1532,22 @@
 			}*/
 
 			// drawing the protagonist
-			if (drawProtagonist) {
-				cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
-				               protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
-				               protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
-				               protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
-			}
+			
+			cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
+				           protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
+				           protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
+				           protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
+			
 
 
 			if(protagonistObj.visionRadius){
 				addDungeonVision() 
 			};
 
-			if (drawAimImage) {
-				cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
-			}
-
 			 
 
 		}
+
 
 
 
@@ -1552,11 +1599,14 @@
 			if (!protagonistObj.stopRequestingFrame)
 			{window.requestAnimationFrame(gameLoop) ;}
 		    else{
-		        cancelAnimationFrame(myVar);
 
-		    	setTimeout ( function () {
-		    		startNewLevel() ;
-		    	} , 2500 );
+		    	if (protagonistObj.levelCompleted) {
+		    		cancelAnimationFrame(myVar);
+
+		    	    setTimeout ( function () {
+		    		    startNewLevel() ;
+		    	    } , 2500 );
+		    	}		        
 
 		    }
 		
