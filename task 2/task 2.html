@@ -20,6 +20,11 @@
 		
 		'use strict'
 
+		var displayInstructions = false ;
+
+		var instructions = document.createElement("IMG") ;
+		instructions.src = "Instructions.png" ;
+
 		var canvas = document.getElementById("gameCanvas") , cxt = canvas.getContext("2d") ;
 
 		function mouseAim () {
@@ -307,6 +312,14 @@
 
 
 			document.addEventListener("keydown" , function (e) {
+
+				if (e.key == "i" || e.key == "I") {
+					displayInstructions = true ;
+				}
+
+				if (e.keyCode == 27) {
+					displayInstructions = false ;
+				}
 
                
 				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false) {
@@ -810,6 +823,10 @@
 					}
 					
 
+				}
+
+				if (displayInstructions) {
+					this.cxt.drawImage(instructions , 0 , 0 ) ;
 				}
 
 
@@ -1462,10 +1479,8 @@
 		function startNewLevel () {
 
 			initializeNewLevel() ;
-			    
-			myVar = window.requestAnimationFrame(gameLoop) ;
-
-			
+			myVar = window.requestAnimationFrame(gameLoop) ;			
+		
 		}
 
 		 
