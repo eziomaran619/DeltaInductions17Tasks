@@ -947,21 +947,15 @@
                     
                     				        }
 
+                    				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
+                                            {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
+                                            protagonistObj.collision.north = true;}
+
 
                     				    }
 
 
-                    }				
-
-
-                    if (!protagonistObj.collision.north) {
-                    
-                        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
-                        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
-                        protagonistObj.collision.north = true;}
-                    
-                    }
-
+                    }	
 
 
 
@@ -1001,9 +995,9 @@
 
 
 
-                if (protagonistObj.type != "eagle")
-                {
-                	for (var i = 0; i < dungeonPillarsCount; i++) {
+                    if (protagonistObj.type != "eagle")
+                    {
+                	    for (var i = 0; i < dungeonPillarsCount; i++) {
                 					
                 					
                 					    if (  ( (protagonistObj.y+protagonistObj.actualHeight/2<dungeonPillars[i].y+50+overallDisplacement.y    &&   
@@ -1050,20 +1044,16 @@
                 						        {protagonistObj.collision.east = false;}
                 					  
                 				        }
+
+                				        if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
+                	                    {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
+                	                    protagonistObj.collision.east = true;}
                 
                 				        
                 
                 				    }
 
-                }
-
-                if (!protagonistObj.collision.east) {
-
-                	if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
-                	{overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
-                	protagonistObj.collision.east = true;}
-                }
-
+                    }
 
 
 
@@ -1150,21 +1140,15 @@
                     						        {protagonistObj.collision.west = false;}
                     					  
                     				        }
-                    
+
+                    				        if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x)                    
+                    	                    {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
+                    	                    protagonistObj.collision.west = true;}                   
                     				        
                     
                     				    }
 
                     }
-
-
-                    if (!protagonistObj.collision.west) {
-
-                    	if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x)                    
-                    	{overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
-                    	protagonistObj.collision.west = true;}
-                    }
-
 
 					
 				}
@@ -1248,22 +1232,15 @@
                     						        {protagonistObj.collision.south = false;}
                     
                     				        }
-                    
+
+                    				        if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y)                     
+                    	                    {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
+                    	                    protagonistObj.collision.south = true;}                    
                     				        
                     
                     				    }
 
                     }
-
-
-                    if (!protagonistObj.collision.south) {
-
-                    	if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y)                     
-                    	{overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
-                    	protagonistObj.collision.south = true;}
-                    }
-
-
 
 					
 				}
