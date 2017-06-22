@@ -91,6 +91,7 @@
 			this.gameOver = false ;
 			this.cutSceneAnimation = true ;
 			this.visionRadius = 700 ; // 400 to 600 is playable , false -> full visibility
+			this.poweringup = false ;
 
 			this.footStepsSoundFile = document.createElement("AUDIO") ;
 			this.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
@@ -144,6 +145,9 @@
 
 		var numbersSprite = document.createElement("IMG") ;
 		numbersSprite.src = "numbers.png" ;
+
+		var powerupSprite = document.createElement("IMG") ;
+		powerupSprite.src = "sprites/power up sprite sheet.png" ;
 
 		//var drawDungeonfloorTile = false ;
 
@@ -202,6 +206,21 @@
 			this.doorOpeningAnimationTimeInterval ;
 		}
 
+		function powerup () {
+			this.frameWidth = 65 ;
+			this.frameHeight = 80 ;
+			this.totalAnimationFrames = 7 ;
+			this.currentFrameIndex = 0 ;
+			this.powerupTimeInterval ;
+			this.poweringup = false ;
+
+			this.powerupSoundFile = document.createElement("AUDIO") ;
+			this.powerupSoundFile.src = "sound_files/power up sound effect.mp3" ;
+			this.powerupSoundFile.volume = 0.2 ;
+        }
+
+
+        var protagonistPowerup = new powerup() ;
 
 
 		function doorKey(X,Y) {
@@ -297,7 +316,7 @@
 			document.addEventListener("keydown" , function (e) {
 
 				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && 
-					  mainBossDoor.currentFrameIndex == 0 && protagonistObj.type != "eagle") {
+					  mainBossDoor.currentFrameIndex == 0 && protagonistObj.type != "eagle" && protagonistObj.poweringup == false) {
 
 					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
 						protagonistObj.x<mainBossDoor.x+50+overallDisplacement.x &&
@@ -344,7 +363,7 @@
 				}
 
                
-				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false) {
+				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
 
 					protagonistObj.keyPressed.s = true ;
 					protagonistObj.keyPressed.a = false ;
@@ -357,7 +376,7 @@
 
 
                 
-				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false) {
+				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = true ;
@@ -369,7 +388,7 @@
 
 
                 
-				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false) {
+				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = false ;
@@ -381,7 +400,7 @@
 
 
                 
-				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false) {
+				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = false ;
@@ -392,6 +411,41 @@
 				}
 
 				if (e.key == "1" && protagonistObj.type != "professor") {
+
+				    if (protagonistObj.type != "eagle")
+					{
+						if (!protagonistObj.poweringup) {
+
+							protagonistPowerup.currentFrameIndex = 0 
+					
+						    protagonistObj.poweringup = true ;
+
+			                protagonistPowerup.powerupSoundFile.pause() ;
+			                protagonistPowerup.powerupSoundFile.load() ;
+					
+						    protagonistPowerup.powerupSoundFile.play() ;
+					
+						    protagonistPowerup.powerupTimeInterval = setInterval ( function () {
+					
+							    if (protagonistPowerup.currentFrameIndex == protagonistPowerup.totalAnimationFrames -1 ) {
+					
+									protagonistObj.poweringup = false ;					
+					
+					                clearInterval(protagonistPowerup.powerupTimeInterval) ;
+												    
+							    }else{protagonistPowerup.currentFrameIndex++ ;} 
+					
+					
+						    } , 120 ) ;
+					
+					    }
+					    else{
+						    protagonistPowerup.currentFrameIndex = 0 ;
+			                protagonistPowerup.powerupSoundFile.pause() ;
+			                protagonistPowerup.powerupSoundFile.load() ;
+			                protagonistPowerup.powerupSoundFile.play() ;
+					    }
+					}
 
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
@@ -418,6 +472,41 @@
 
 				if (e.key == "2" && protagonistObj.type != "combatant") {
 
+					if (protagonistObj.type != "eagle")
+					{
+						if (!protagonistObj.poweringup) {
+
+							protagonistPowerup.currentFrameIndex = 0 ;
+
+						    protagonistObj.poweringup = true ;
+
+			                protagonistPowerup.powerupSoundFile.pause() ;
+			                protagonistPowerup.powerupSoundFile.load() ;
+					
+						    protagonistPowerup.powerupSoundFile.play() ;
+					
+						    protagonistPowerup.powerupTimeInterval = setInterval ( function () {
+					
+							    if (protagonistPowerup.currentFrameIndex == protagonistPowerup.totalAnimationFrames -1 ) {
+					
+									protagonistObj.poweringup = false ;
+					
+					                clearInterval(protagonistPowerup.powerupTimeInterval) ;
+												    
+							    }else{protagonistPowerup.currentFrameIndex++ ;} 
+					
+					
+						    } , 120 ) ;
+					
+					    }
+					    else{
+						    protagonistPowerup.currentFrameIndex = 0 ;
+			                protagonistPowerup.powerupSoundFile.pause() ;
+			                protagonistPowerup.powerupSoundFile.load() ;
+			                protagonistPowerup.powerupSoundFile.play() ;
+					    }
+					}
+
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
 			        
@@ -442,6 +531,43 @@
 				}
 
 				if (e.key == "3" && protagonistObj.type != "escapist") {
+
+					if (protagonistObj.type != "eagle")
+					{
+						if (!protagonistObj.poweringup) {
+
+							protagonistPowerup.currentFrameIndex = 0 ;
+					
+							protagonistObj.poweringup = true ;
+
+			                protagonistPowerup.powerupSoundFile.pause() ;
+			                protagonistPowerup.powerupSoundFile.load() ;
+					
+							protagonistPowerup.powerupSoundFile.play() ;
+					
+							protagonistPowerup.powerupTimeInterval = setInterval ( function () {
+					
+								if (protagonistPowerup.currentFrameIndex == protagonistPowerup.totalAnimationFrames -1 ) {
+					
+									    protagonistObj.poweringup = false ;
+					
+					
+						                clearInterval(protagonistPowerup.powerupTimeInterval) ;
+												    
+							    }else{protagonistPowerup.currentFrameIndex++ ;} 
+					
+					
+							} , 120 ) ;
+					
+						}
+						else{
+							protagonistPowerup.currentFrameIndex = 0 ;
+				            protagonistPowerup.powerupSoundFile.pause() ;
+				            protagonistPowerup.powerupSoundFile.load() ;
+				            protagonistPowerup.powerupSoundFile.play() ;
+						}
+
+					}
 
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
@@ -524,6 +650,7 @@
 
                     protagonistObj.eagleIntroSoundFile.load() ;
 			        protagonistObj.eagleIntroSoundFile.play() ;
+
 
 			
 				}
@@ -632,10 +759,23 @@
 				}*/
 
 
-			    this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
-				                    protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
-				                    protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
-				                    protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
+			    
+
+			    if (protagonistObj.poweringup) {
+
+			    	this.cxt.drawImage( powerupSprite , protagonistPowerup.frameWidth*protagonistPowerup.currentFrameIndex , 0 , 
+					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight , 
+					                    protagonistObj.x - protagonistPowerup.frameWidth/2 , 
+					                    protagonistObj.y - protagonistPowerup.frameHeight/2 , 
+					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight ) ;
+			    }
+			    else{
+
+			    	this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
+				                        protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
+				                        protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
+				                        protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
+			    }
 
 
 			    if (protagonistObj.visionRadius){
