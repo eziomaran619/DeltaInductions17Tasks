@@ -216,7 +216,7 @@
 
 			this.powerupSoundFile = document.createElement("AUDIO") ;
 			this.powerupSoundFile.src = "sound_files/power up sound effect.mp3" ;
-			this.powerupSoundFile.volume = 0.2 ;
+			this.powerupSoundFile.volume = 0.03 ;
         }
 
 
@@ -316,7 +316,7 @@
 			document.addEventListener("keydown" , function (e) {
 
 				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && 
-					  mainBossDoor.currentFrameIndex == 0 && protagonistObj.type != "eagle" && protagonistObj.poweringup == false) {
+					  mainBossDoor.currentFrameIndex == 0 && protagonistObj.type == "professor") {
 
 					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
 						protagonistObj.x<mainBossDoor.x+50+overallDisplacement.x &&
@@ -363,7 +363,7 @@
 				}
 
                
-				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
+				if ((e.key === "s" || e.key === "S") && protagonistObj.cutSceneAnimation == false) {
 
 					protagonistObj.keyPressed.s = true ;
 					protagonistObj.keyPressed.a = false ;
@@ -376,7 +376,7 @@
 
 
                 
-				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
+				if ((e.key === "a" || e.key === "A") && protagonistObj.cutSceneAnimation == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = true ;
@@ -388,7 +388,7 @@
 
 
                 
-				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
+				if ((e.key === "d" || e.key === "D") && protagonistObj.cutSceneAnimation == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = false ;
@@ -400,7 +400,7 @@
 
 
                 
-				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false && protagonistObj.poweringup == false) {
+				if ((e.key === "w" || e.key === "W") && protagonistObj.cutSceneAnimation == false) {
 
 					protagonistObj.keyPressed.s = false ;
 					protagonistObj.keyPressed.a = false ;
@@ -946,15 +946,21 @@
                     						        {protagonistObj.collision.north = false;}
                     
                     				        }
-                    
-                    				        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
-                    				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
-                    				        protagonistObj.collision.north = true;}
-                    
+
+
                     				    }
 
 
-                    				}				
+                    }				
+
+
+                    if (!protagonistObj.collision.north) {
+                    
+                        if (protagonistObj.y+protagonistObj.actualHeight/2-20 <= dungeonTopBoundary+overallDisplacement.y) 
+                        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2-20 - dungeonTopBoundary ;
+                        protagonistObj.collision.north = true;}
+                    
+                    }
 
 
 
@@ -1045,13 +1051,18 @@
                 					  
                 				        }
                 
-                				        if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
-                				        {overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
-                				        protagonistObj.collision.east = true;}
+                				        
                 
                 				    }
 
-                				}
+                }
+
+                if (!protagonistObj.collision.east) {
+
+                	if (protagonistObj.x+protagonistObj.actualWidth/2 >= dungeonRightBoundary+overallDisplacement.x) 
+                	{overallDisplacement.x = protagonistObj.x + protagonistObj.actualWidth/2 - (dungeonRightBoundary) ;
+                	protagonistObj.collision.east = true;}
+                }
 
 
 
@@ -1140,14 +1151,19 @@
                     					  
                     				        }
                     
-                    				        if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x) 
-                    
-                    				        {overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
-                    				        protagonistObj.collision.west = true;}
+                    				        
                     
                     				    }
 
-                    				}
+                    }
+
+
+                    if (!protagonistObj.collision.west) {
+
+                    	if (protagonistObj.x-protagonistObj.actualWidth/2 <= dungeonLeftBoundary+overallDisplacement.x)                    
+                    	{overallDisplacement.x = protagonistObj.x - protagonistObj.actualWidth/2 - dungeonLeftBoundary ;
+                    	protagonistObj.collision.west = true;}
+                    }
 
 
 					
@@ -1233,14 +1249,19 @@
                     
                     				        }
                     
-                    				        if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y) 
-                    
-                    				        {overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
-                    				        protagonistObj.collision.south = true;}
+                    				        
                     
                     				    }
 
-                    				}
+                    }
+
+
+                    if (!protagonistObj.collision.south) {
+
+                    	if (protagonistObj.y+protagonistObj.actualHeight/2 >= dungeonBottomBoundary+overallDisplacement.y)                     
+                    	{overallDisplacement.y = protagonistObj.y+protagonistObj.actualHeight/2 - dungeonBottomBoundary ;
+                    	protagonistObj.collision.south = true;}
+                    }
 
 
 
