@@ -396,22 +396,22 @@
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
 			        
-			        	protagonistObj.type = "professor" ;
-			            protagonistObj.totalAnimationFrames = 9 ; // refers to horizontal or vertical depending on the character
-			            protagonistObj.currentHorizontalFrameIndex = 0 ;
-			            protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  2 , "north" :  0 , "east" :  3 , "west" :  1 } ;
-			            protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
-			            protagonistObj.frameHeight = 64 ;
-			            protagonistObj.frameWidth = 64 ;
-			            protagonistObj.actualHeight = 64 ;
-			            protagonistObj.actualWidth = 30 ;
-			            protagonistObj.speed = 5 ;
-			            protagonistObj.visionRadius = 700 ; // false -> full visibility
+			        protagonistObj.type = "professor" ;
+			        protagonistObj.totalAnimationFrames = 9 ; // refers to horizontal or vertical depending on the character
+			        protagonistObj.currentHorizontalFrameIndex = 0 ;
+			        protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  2 , "north" :  0 , "east" :  3 , "west" :  1 } ;
+			        protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
+			        protagonistObj.frameHeight = 64 ;
+			        protagonistObj.frameWidth = 64 ;
+			        protagonistObj.actualHeight = 64 ;
+			        protagonistObj.actualWidth = 30 ;
+			        protagonistObj.speed = 4 ;
+			        protagonistObj.visionRadius = 700 ; // false -> full visibility
 			        
-			            protagonistImage.src = "character_sprites/professor_movement_sprite.png" ;
+			        protagonistImage.src = "character_sprites/professor_movement_sprite.png" ;
 			        
-			            protagonistObj.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
-			            protagonistObj.footStepsSoundFile.volume = 0.1 ;
+			        protagonistObj.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
+			        protagonistObj.footStepsSoundFile.volume = 0.1 ;
 			        
 			
 				}
@@ -421,22 +421,22 @@
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
 			        
-			        	protagonistObj.type = "combatant" ;
-			        	protagonistObj.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
-			        	protagonistObj.currentHorizontalFrameIndex = 0 ;
-			        	protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  0 , "north" :  3 , "east" :  2 , "west" :  1 } ;
-			        	protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
-			        	protagonistObj.frameHeight = 70 ;
-			        	protagonistObj.frameWidth = 70 ;
-			        	protagonistObj.actualHeight = 70 ;
-			        	protagonistObj.actualWidth = 40 ;
-			        	protagonistObj.speed = 5 ;
-			        	protagonistObj.visionRadius = 450 ; // false -> full visibility
+			        protagonistObj.type = "combatant" ;
+			        protagonistObj.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
+			        protagonistObj.currentHorizontalFrameIndex = 0 ;
+			        protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  0 , "north" :  3 , "east" :  2 , "west" :  1 } ;
+			        protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
+			        protagonistObj.frameHeight = 70 ;
+			        protagonistObj.frameWidth = 70 ;
+			        protagonistObj.actualHeight = 70 ;
+			        protagonistObj.actualWidth = 40 ;
+			        protagonistObj.speed = 4 ;
+			        protagonistObj.visionRadius = 450 ; // false -> full visibility
+			       
+			        protagonistImage.src = "character_sprites/combatant_movement_sprite.png" ;
 			        
-			        	protagonistImage.src = "character_sprites/combatant_movement_sprite.png" ;
-			        
-			        	protagonistObj.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
-			        	protagonistObj.footStepsSoundFile.volume = 0.1 ;
+			        protagonistObj.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
+			        protagonistObj.footStepsSoundFile.volume = 0.1 ;
 			        
 			
 				}
@@ -446,23 +446,23 @@
 					overallDisplacement.x = previousOverallDisplacement.x ;
 					overallDisplacement.y = previousOverallDisplacement.y ;
 			        
-			        	protagonistObj.type = "escapist" ;
-			        	protagonistObj.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
-			        	protagonistObj.currentHorizontalFrameIndex = 0 ;
-			        	protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  0 , "north" :  3 , "east" :  2 , "west" :  1 } ;
-			        	protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
-			        	protagonistObj.frameHeight = 50 ;
-			        	protagonistObj.frameWidth = 50 ;
-			        	protagonistObj.actualHeight = 50 ;
-			        	protagonistObj.actualWidth = 50 ;
-			        	protagonistObj.speed = 7 ;
-			        	protagonistObj.visionRadius = 400 ; // false -> full visibility
+			        protagonistObj.type = "escapist" ;
+			        protagonistObj.totalAnimationFrames = 8 ; // refers to horizontal or vertical depending on the character
+			        protagonistObj.currentHorizontalFrameIndex = 0 ;
+			        protagonistObj.currentVerticalFrameIndexForMovement = { "south" :  0 , "north" :  3 , "east" :  2 , "west" :  1 } ;
+			        protagonistObj.currentVerticalFrameIndex = protagonistObj.currentVerticalFrameIndexForMovement[protagonistObj.direction] ;
+			        protagonistObj.frameHeight = 50 ;
+			        protagonistObj.frameWidth = 50 ;
+			        protagonistObj.actualHeight = 50 ;
+			        protagonistObj.actualWidth = 50 ;
+			        protagonistObj.speed = 6 ;
+			        protagonistObj.visionRadius = 400 ; // false -> full visibility
 			        
 			        
-			        	protagonistImage.src = "character_sprites/escapist_movement_sprite.png" ;
+			        protagonistImage.src = "character_sprites/escapist_movement_sprite.png" ;
 			        
-			        	protagonistObj.footStepsSoundFile.src = "sound_files/fast_walking_foot_steps_sound_1.mp3" ;
-			        	protagonistObj.footStepsSoundFile.volume = 0.1 ;
+			        protagonistObj.footStepsSoundFile.src = "sound_files/running sound.mp3" ;
+			        protagonistObj.footStepsSoundFile.volume = 0.1 ;
 			        
 
 
@@ -497,7 +497,7 @@
 			        protagonistObj.frameWidth = 80 ;
 			        protagonistObj.actualHeight = 60 ;
 			        protagonistObj.actualWidth = 80 ;
-			        protagonistObj.speed = 4 ;
+			        protagonistObj.speed = 5 ;
 			        protagonistObj.visionRadius = 450 ; // false -> full visibility
 			        protagonistObj.collision = {south : false , north : false , east : false , west : false} ;
 
