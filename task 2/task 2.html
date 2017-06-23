@@ -76,7 +76,7 @@
 			this.frameHeight = 64 ;
 			this.frameWidth = 64 ;
 			this.actualHeight = 64 ;
-			this.actualWidth = 30 ;
+			this.actualWidth = 45 ;
 			this.speed = 5 ;
 			this.collision = {south : false , north : false , east : false , west : false} ;
 			this.keyPressed = {w : false , a : false , s : false , d : false} ;
@@ -216,7 +216,7 @@
 
 			this.powerupSoundFile = document.createElement("AUDIO") ;
 			this.powerupSoundFile.src = "sound_files/power up sound effect.mp3" ;
-			this.powerupSoundFile.volume = 0.03 ;
+			this.powerupSoundFile.volume = 0.02 ;
         }
 
 
@@ -315,7 +315,7 @@
 
 			document.addEventListener("keydown" , function (e) {
 
-				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && 
+				if ( (e.key == "e" || e.key == "E") && mainBossDoorKey.collected == true && protagonistObj.poweringup != true &&
 					  mainBossDoor.currentFrameIndex == 0 && protagonistObj.type == "professor") {
 
 					if (protagonistObj.x>mainBossDoor.x-50+overallDisplacement.x && 
@@ -459,7 +459,7 @@
 			        protagonistObj.frameHeight = 64 ;
 			        protagonistObj.frameWidth = 64 ;
 			        protagonistObj.actualHeight = 64 ;
-			        protagonistObj.actualWidth = 30 ;
+			        protagonistObj.actualWidth = 45 ;
 			        protagonistObj.speed = 4 ;
 			        protagonistObj.visionRadius = 700 ; // false -> full visibility
 			        
@@ -519,7 +519,7 @@
 			        protagonistObj.frameHeight = 70 ;
 			        protagonistObj.frameWidth = 70 ;
 			        protagonistObj.actualHeight = 70 ;
-			        protagonistObj.actualWidth = 40 ;
+			        protagonistObj.actualWidth = 45 ;
 			        protagonistObj.speed = 4 ;
 			        protagonistObj.visionRadius = 450 ; // false -> full visibility
 			       
@@ -582,7 +582,7 @@
 			        protagonistObj.frameHeight = 50 ;
 			        protagonistObj.frameWidth = 50 ;
 			        protagonistObj.actualHeight = 50 ;
-			        protagonistObj.actualWidth = 50 ;
+			        protagonistObj.actualWidth = 45 ;
 			        protagonistObj.speed = 6 ;
 			        protagonistObj.visionRadius = 400 ; // false -> full visibility
 			        
@@ -1632,8 +1632,8 @@
 						        protagonistObj.gameOver = true ;
 					        }
 					        else{
-					        	gameCountdown.minutes -- ;
 					        	gameCountdown.countdownMinuteReminderSoundFile.play() ;
+					        	gameCountdown.minutes -- ;
 					        }
 
 					        gameCountdown.seconds = 59 ;
