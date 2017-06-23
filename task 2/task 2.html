@@ -207,8 +207,8 @@
 		}
 
 		function powerup () {
-			this.frameWidth = 65 ;
-			this.frameHeight = 80 ;
+			this.frameWidth = 284/7 ;
+			this.frameHeight = 50 ;
 			this.totalAnimationFrames = 7 ;
 			this.currentFrameIndex = 0 ;
 			this.powerupTimeInterval ;
@@ -414,6 +414,7 @@
 
 				    if (protagonistObj.type != "eagle")
 					{
+
 						if (!protagonistObj.poweringup) {
 
 							protagonistPowerup.currentFrameIndex = 0 
@@ -534,6 +535,7 @@
 
 					if (protagonistObj.type != "eagle")
 					{
+
 						if (!protagonistObj.poweringup) {
 
 							protagonistPowerup.currentFrameIndex = 0 ;
@@ -692,121 +694,7 @@
 				if (protagonistObj.levelCompleted == false && protagonistObj.gameOver == false) {
 
 
-
-				this.cxt.clearRect(0,0,canvas.width,canvas.height) ;
-
-			    this.cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
-			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
-
-			    if (mainBossDoorKey.visible) 
-			    {this.cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ; }
-
-				for (var i = 0; i < coinsCount ; i++) {
-
-					this.cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 0 , 
-						                coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2+overallDisplacement.x , 
-				                        coins[i].y - coins[i].frameHeight/2+overallDisplacement.y , coins[i].frameWidth , coins[i].frameHeight ) ;					
-				}
-
-
-			    for (var i = 0; i < dungeonWallsCount ; i++) {
-
-					if (dungeonWalls[i].shadowed) {
-
-						this.cxt.drawImage(wallWithShadow , dungeonWalls[i].x-50+overallDisplacement.x , 
-							               dungeonWalls[i].y-50+overallDisplacement.y ) ;
-					}					
-				}
-
-
-				for (var i = 0; i < dungeonWallsCount ; i++) {
-
-					if (!dungeonWalls[i].shadowed) {
-
-						this.cxt.drawImage(wallWithoutShadow , dungeonWalls[i].x-50+overallDisplacement.x , 
-							               dungeonWalls[i].y-50+overallDisplacement.y ) ;
-					}					
-				}
-
-				for (var i = 0; i < dungeonPillarsCount ; i++) {
-
-					if (!dungeonPillars[i].shadowed) {
-
-						this.cxt.drawImage(wallWithoutShadow , dungeonPillars[i].x-50+overallDisplacement.x , 
-							               dungeonPillars[i].y-50+overallDisplacement.y ) ;
-					}					
-				}
-
-				for (var i = 0; i < dungeonUpperBoundaryWallsToBeUnshadowedCount ; i++) {
-
-					this.cxt.drawImage(wallWithoutShadow,dungeonUpperBoundaryWallsToBeUnshadowed[i].x-50+overallDisplacement.x , 
-						                                 dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50+overallDisplacement.y) ;		                              					
-				}
-
-				if (mainBossDoorKey.collected == true) {
-				this.cxt.drawImage( mainBossDoorSprite , mainBossDoor.frameWidth*mainBossDoor.currentFrameIndex , 0 , 
-					                mainBossDoor.frameWidth , mainBossDoor.frameHeight , 
-					                mainBossDoor.x - mainBossDoor.frameWidth/2+overallDisplacement.x , 
-					                mainBossDoor.y - mainBossDoor.frameHeight/2+overallDisplacement.y , 
-					                mainBossDoor.frameWidth , mainBossDoor.frameHeight ) ;
-			    }
-
-			    /*for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
-
-					this.cxt.drawImage(dungeonFloorTileImage , dungeonNewFloorTiles[i].x-50+overallDisplacement.x , 
-						                                  dungeonNewFloorTiles[i].y-50+overallDisplacement.y) ;
-					
-				}*/
-
-
-			    
-
-			    if (protagonistObj.poweringup) {
-
-			    	this.cxt.drawImage( powerupSprite , protagonistPowerup.frameWidth*protagonistPowerup.currentFrameIndex , 0 , 
-					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight , 
-					                    protagonistObj.x - protagonistPowerup.frameWidth/2 , 
-					                    protagonistObj.y - protagonistPowerup.frameHeight/2 , 
-					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight ) ;
-			    }
-			    else{
-
-			    	this.cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
-				                        protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
-				                        protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
-				                        protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
-			    }
-
-
-			    if (protagonistObj.visionRadius){
-			    	addDungeonVision() ;
-			    }
-
-			    this.cxt.drawImage( healthBarSprite , healthBar.frameWidth*healthBar.currentFrameIndex , 
-				                    0 , healthBar.frameWidth , healthBar.frameHeight , healthBar.x , 
-				                    healthBar.y , healthBar.frameWidth , healthBar.frameHeight ) ;
-
-			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*gameCountdown.minutes ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x - gameCountdown.frameWidth - 5 ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
-
-			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(Math.floor(gameCountdown.seconds/10)) ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + 5 ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
-
-			    this.cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(gameCountdown.seconds%10) ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + gameCountdown.frameWidth + 5 ,
-				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
-
-
-
-			    
-				this.cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
-			    
-
-			    this.cxt.drawImage(readInstructions , 0 , 0 ) ;
-
-
+					drawGame() ;
 
 
 				}
@@ -846,9 +734,7 @@
 				}
 
 
-				if (displayInstructions) {
-					this.cxt.drawImage(instructions , 0 , 0 ) ;
-				}
+				if (displayInstructions) {this.cxt.drawImage(instructions , 0 , 0 ) ;}
 
 
 
@@ -1690,7 +1576,7 @@
 
 		if (drawEverything && level == 1) {
 
-			drawInitialFrame() ;
+			drawGame() ;
 
 		}
 
@@ -1718,7 +1604,7 @@
 
 				cxt.clearRect(0,0,canvas.width,canvas.height) ;
 
-				drawInitialFrame() ;
+				drawGame() ;
 
 				for (var i = protagonistObj.cutSceneAnimationRadius ; i <= 850 ; i += 19 ) {				
 				    cxt.beginPath();
@@ -1791,90 +1677,112 @@
 
 
 
-		function drawInitialFrame () {
+		function drawGame () {
 
-			// drawing the basic dungeon layout
-			cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150,protagonistObj.y-150) ;
+			cxt.clearRect(0,0,canvas.width,canvas.height) ;
 
-			if (mainBossDoorKey.visible) {
-				cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50 , mainBossDoorKey.y-50 ) ;
-			}         	
+			    cxt.drawImage(dungeonBasicLayout,protagonistObj.x-150+overallDisplacement.x , 
+			    	                                  protagonistObj.y-150+overallDisplacement.y ) ;
 
-			
+			    if (mainBossDoorKey.visible) 
+			    {cxt.drawImage( mainBossDoorKeyImage , mainBossDoorKey.x-50+overallDisplacement.x , mainBossDoorKey.y-50+overallDisplacement.y ) ; }
 
-			for (var i = 0; i < coinsCount ; i++) {
+				for (var i = 0; i < coinsCount ; i++) {
 
-				cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 
-				               0 , coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2 , 
-				               coins[i].y - coins[i].frameHeight/2 , coins[i].frameWidth , coins[i].frameHeight ) ;					
-			}
-
-			
-
-
-			
-
-				// drawing walls with shadow
-			for (var i = 0; i < dungeonWallsCount ; i++) {
-
-				if (dungeonWalls[i].shadowed) {
-
-					cxt.drawImage(wallWithShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
-				}					
-			}
-			
-
-			
-
-			// drawing walls with no shadow
-			for (var i = 0; i < dungeonWallsCount ; i++) {
-
-				if (!dungeonWalls[i].shadowed) {
-
-					cxt.drawImage(wallWithoutShadow,dungeonWalls[i].x-50,dungeonWalls[i].y-50) ;
-				}					
-			}
-
-			// updating the pillars with no shadow
-			for (var i = 0; i < dungeonPillarsCount ; i++) {
-
-				if (!dungeonPillars[i].shadowed) {
-
-					cxt.drawImage(wallWithoutShadow,dungeonPillars[i].x-50,dungeonPillars[i].y-50) ;
-				}					
-			}
-
-			// updating the dungeon's upper boundary walls with no shadow
-			for (var i = 0; i < dungeonUpperBoundaryWallsToBeUnshadowedCount ; i++) {
-
-				cxt.drawImage(wallWithoutShadow,dungeonUpperBoundaryWallsToBeUnshadowed[i].x-50 , 
-						      dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50) ;		                              					
-			}
-
-			
-
-			/*if (drawDungeonfloorTile) {
-
-				for (var i = 0; i < dungeonNewFloorTilesCount ; i++) {
-
-					cxt.drawImage(dungeonFloorTileImage,dungeonNewFloorTiles[i].x-50,dungeonNewFloorTiles[i].y-50) ;
-					
+					cxt.drawImage( coinRotationSprite , coins[i].frameWidth*coins[i].currentFrameIndex , 0 , 
+						                coins[i].frameWidth , coins[i].frameHeight , coins[i].x - coins[i].frameWidth/2+overallDisplacement.x , 
+				                        coins[i].y - coins[i].frameHeight/2+overallDisplacement.y , coins[i].frameWidth , coins[i].frameHeight ) ;					
 				}
-			}*/
-
-			// drawing the protagonist
-			
-			cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
-				           protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
-				           protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
-				           protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
-			
 
 
-			if(protagonistObj.visionRadius){
-				addDungeonVision() 
-			};
+			    for (var i = 0; i < dungeonWallsCount ; i++) {
 
+					if (dungeonWalls[i].shadowed) {
+
+						cxt.drawImage(wallWithShadow , dungeonWalls[i].x-50+overallDisplacement.x , 
+							               dungeonWalls[i].y-50+overallDisplacement.y ) ;
+					}					
+				}
+
+
+				for (var i = 0; i < dungeonWallsCount ; i++) {
+
+					if (!dungeonWalls[i].shadowed) {
+
+					cxt.drawImage(wallWithoutShadow , dungeonWalls[i].x-50+overallDisplacement.x , 
+							               dungeonWalls[i].y-50+overallDisplacement.y ) ;
+					}					
+				}
+
+				for (var i = 0; i < dungeonPillarsCount ; i++) {
+
+					if (!dungeonPillars[i].shadowed) {
+
+						cxt.drawImage(wallWithoutShadow , dungeonPillars[i].x-50+overallDisplacement.x , 
+							               dungeonPillars[i].y-50+overallDisplacement.y ) ;
+					}					
+				}
+
+				for (var i = 0; i < dungeonUpperBoundaryWallsToBeUnshadowedCount ; i++) {
+
+					cxt.drawImage(wallWithoutShadow,dungeonUpperBoundaryWallsToBeUnshadowed[i].x-50+overallDisplacement.x , 
+						                                 dungeonUpperBoundaryWallsToBeUnshadowed[i].y-50+overallDisplacement.y) ;		                              					
+				}
+
+				if (mainBossDoorKey.collected == true) {
+				cxt.drawImage( mainBossDoorSprite , mainBossDoor.frameWidth*mainBossDoor.currentFrameIndex , 0 , 
+					                mainBossDoor.frameWidth , mainBossDoor.frameHeight , 
+					                mainBossDoor.x - mainBossDoor.frameWidth/2+overallDisplacement.x , 
+					                mainBossDoor.y - mainBossDoor.frameHeight/2+overallDisplacement.y , 
+					                mainBossDoor.frameWidth , mainBossDoor.frameHeight ) ;
+			    }
+
+			    
+
+			    if (protagonistObj.poweringup) {
+
+			    	cxt.drawImage( powerupSprite , protagonistPowerup.frameWidth*protagonistPowerup.currentFrameIndex , 0 , 
+					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight , 
+					                    protagonistObj.x - protagonistPowerup.frameWidth/2 , 
+					                    protagonistObj.y - protagonistPowerup.frameHeight/2 , 
+					                    protagonistPowerup.frameWidth , protagonistPowerup.frameHeight ) ;
+			    }
+			    else{
+
+			    	cxt.drawImage( protagonistImage , protagonistObj.frameWidth*protagonistObj.currentHorizontalFrameIndex , 
+				                        protagonistObj.frameHeight*protagonistObj.currentVerticalFrameIndex , protagonistObj.frameWidth , 
+				                        protagonistObj.frameHeight , protagonistObj.x - protagonistObj.frameWidth/2 , 
+				                        protagonistObj.y - protagonistObj.frameHeight/2 , protagonistObj.frameWidth , protagonistObj.frameHeight ) ;
+			    }
+
+
+			    if (protagonistObj.visionRadius){
+			    	addDungeonVision() ;
+			    }
+
+			    cxt.drawImage( healthBarSprite , healthBar.frameWidth*healthBar.currentFrameIndex , 
+				                    0 , healthBar.frameWidth , healthBar.frameHeight , healthBar.x , 
+				                    healthBar.y , healthBar.frameWidth , healthBar.frameHeight ) ;
+
+			    cxt.drawImage(numbersSprite , gameCountdown.frameWidth*gameCountdown.minutes ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x - gameCountdown.frameWidth - 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+			    cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(Math.floor(gameCountdown.seconds/10)) ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+			    cxt.drawImage(numbersSprite , gameCountdown.frameWidth*(gameCountdown.seconds%10) ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight , protagonistObj.x + gameCountdown.frameWidth + 5 ,
+				                   0 , gameCountdown.frameWidth , gameCountdown.frameHeight) ;
+
+
+
+			    
+				cxt.drawImage( aimImage , aim.x-aim.frameWidth/2 , aim.y-aim.frameHeight/2 ) ;
+			    
+
+			    cxt.drawImage(readInstructions , 0 , 0 ) ;
 			 
 
 		}
