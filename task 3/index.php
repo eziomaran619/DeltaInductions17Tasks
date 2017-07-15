@@ -3,12 +3,11 @@ require "connect_to_database.php" ;
 ?>
 
 <?php
-if ($_SESSION["user"]) {
-	header("Location: userloggedin.php") ;
-	exit();
+if (isset($_SESSION["user"])) {
+    header("Location: userloggedin.php") ;
+    exit();
 }else{
-	header("Location: defaultpage.php") ;
-	exit();
+	header("Location: loginpage.php") ;
 }
 
 ?>

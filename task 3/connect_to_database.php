@@ -11,5 +11,7 @@
 		die("unable to establish connection with database : " . mysqli_connect_error());
 	}
 
+	date_default_timezone_set("Asia/Kolkata") ;
+
 	session_start() ;
 ?>
