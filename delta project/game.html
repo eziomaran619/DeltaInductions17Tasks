@@ -47,6 +47,7 @@
 		function setMouseAimClickPosition (e) {
 			mouseAim.clickAtX = e.clientX - canvas.offsetLeft ;
 			mouseAim.clickAtY = e.clientY - canvas.offsetTop ;
+			controls.throwProjectile = true ;
 		}
 
 		// this class is to enable player to configure the keys according to their wish, default values are as follows
@@ -61,7 +62,7 @@
 		// if the keys corresponding to that in object 'customisedControlsKeyCode' are pressed, corresponding properties of object 'controls' will be set to 'true' to be executed later
 		function Controls () {
 			this.navigation     = {"north" : false , "south" : false , "west" : false , "east" : false} ;
-			this.others         = {"goBack" : false , "interact" : false} ;
+			this.others         = {"goBack" : false , "interact" : false , "throwProjectile" : false} ;
 			this.transformation = {"professor" : false , "combatant" : false , "escapist" : false , "eagle" : false} ;
 		}
 
@@ -234,6 +235,9 @@
 
 			this.angel                       = document.createElement("IMG") ;
 			this.angel.src                   = "sprite_sheets/Sprite_old_woman_walk.png";
+
+			this.stone                       = document.createElement("IMG") ;
+			this.stone.src                   = "sprite_sheets/stone sprite.png";
 		}
 
 		// global sprite sheet object, which contains all animatable sprite sheets
@@ -305,6 +309,7 @@
 			this.characterTransformation = false ; // while switching between diff characters
 			this.burningTree             = false ;
 			this.angel                   = false ;
+			this.projectileAnimation     = false ;
 		}
 		// a new timeInterval object will be created as a property of level object.
 
@@ -327,6 +332,7 @@
 
 		// all common animatables come under this category
 		function Animatable (X,Y,w,h,tAF) {
+			this.type ;
 			this.x = X ;
 			this.y = Y ;
 			this.height = h ;
@@ -385,6 +391,8 @@
 
 			this.exitDoorKeyCollected = false ;
 
+			this.projectileSelected = "stone" ;
+
 		}
 
 		function OtherCharacter (X,Y,N,tAF,H,W,S) {
@@ -412,6 +420,14 @@
 				return { "north":this.y-this.height/2 , "east":this.x+this.width/2 , "west":this.x-this.width/2 , "south":this.y+this.height/2 } ;
 			}
 
+		}
+
+		function Projectile (X,Y) {
+			this.destinationX = X ;
+			this.destinationY = Y ;
+			this.speed ; // fix a default value
+			this.angle ; // this is the total angle wrt +y axis which is = angle of projection + the angle of click, fix a default angle of projection
+			this.gravity ; // fix a default gravity 
 		}
 
 
@@ -458,6 +474,9 @@
 				this.otherCharacters = [] ;
 
 				this.turnPostions = [] ;
+
+				this.projectilesThrown = [] ; // array of animatables
+				this.projectiles       = [] ; // array of projectiles
 
 //----------------------------------------------------------creating pillar objects in the basic layout and coins associated with them-------------------------------------------------------
 
@@ -1082,6 +1101,26 @@
                 				} while (this.otherCharacters[this.i].direction == this.oppositeDirection[this.previousDirection]) ;
                 			}
                 		}
+                	}
+                }
+
+//-------------------------------------------------------------------------throwing selected projectile if throwProjectile is true-----------------------------------------------------------
+
+                if (controls.throwProjectile) {
+                	controls.throwProjectile = false ;
+
+                	this.projectilesThrown[this.projectilesThrown.length] = new new Animatable(this.protagonist.x,this.protagonist.y,20,20,4) ;
+                	this.projectilesThrown[this.projectilesThrown.length-1].type = this.protagonist.projectileSelected ;
+                	this.projectiles[this.projectiles.length] = new new Projectile(mouseAim.clickAtX,mouseAim.clickAtY) ;
+
+                	if (!this.timeIntervals.projectileAnimation) {
+                		this.timeIntervals.projectileAnimation = setInterval( function() {
+                			for (This.i = 0 ; This.i < This.projectiles.length ; This.i++) {
+                				// update the "projectilesThrown" array of animatables using corresponding projectile from the array of projectiles "projectiles".
+                				// if the destination is reached splice the animatable and projectile from respective arrays
+                				// if it the last projectile clear this timeInterval in addition to splicing
+                			}
+                		} , 100 ) ;
                 	}
                 }
 
