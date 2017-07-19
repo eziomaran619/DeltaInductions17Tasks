@@ -54,6 +54,7 @@
 		function CustomisedControlsKeyCode () {
 			this.navigation     = {"north" : "w".charCodeAt(0) , "south" : "s".charCodeAt(0) , "west" : "a".charCodeAt(0) , "east" : "d".charCodeAt(0)} ;
 			this.others         = {"goBack" : 27 , "interact" : "e".charCodeAt(0)} ; // 27 is the keyCode for 'esc' key
+			this.weapon         = {"stone" : "z".charCodeAt(0) , "grenade" : "x".charCodeAt(0) , "flashbang" : "c".charCodeAt(0)} ;
 			this.transformation = {"professor" : "1".charCodeAt(0) , "combatant" : "2".charCodeAt(0) , "escapist" : "3".charCodeAt(0) , "eagle" : "4".charCodeAt(0)} ;
 		}
 
@@ -62,7 +63,8 @@
 		// if the keys corresponding to that in object 'customisedControlsKeyCode' are pressed, corresponding properties of object 'controls' will be set to 'true' to be executed later
 		function Controls () {
 			this.navigation     = {"north" : false , "south" : false , "west" : false , "east" : false} ;
-			this.others         = {"goBack" : false , "interact" : false , "throwProjectile" : false} ;
+			this.others         = {"goBack" : false , "interact" : false} ;
+			this.weapon         = {"stone" : false , "grenade" : false , "flashbang" : false} ;
 			this.transformation = {"professor" : false , "combatant" : false , "escapist" : false , "eagle" : false} ;
 		}
 
@@ -84,6 +86,16 @@
 					{controls.navigation[x] = true ;} 
 				else 
 				    {controls.navigation[x] = false ;}
+				
+			}
+
+			for (x in customisedControlsKeyCode.weapon) {
+
+				if (e.keyCode == customisedControlsKeyCode.weapon[x]) 
+					{controls.weapon[x] = true ;} 
+
+				if (e.key.charCodeAt(0) == customisedControlsKeyCode.weapon[x]) 
+					{controls.weapon[x] = true ;} 
 				
 			}
 
@@ -237,7 +249,19 @@
 			this.angel.src                   = "sprite_sheets/Sprite_old_woman_walk.png";
 
 			this.stone                       = document.createElement("IMG") ;
-			this.stone.src                   = "sprite_sheets/stone sprite.png";
+			this.stone.src                   = "sprite_sheets/pebble sprite.png";
+
+			this.grenade                     = document.createElement("IMG") ;
+			this.grenade.src                 = "sprite_sheets/grenade sprite.png";
+
+			this.flashbang                   = document.createElement("IMG") ;
+			this.flashbang.src               = "sprite_sheets/flashbang sprite.png";
+
+			this.projectileTarget            = document.createElement("IMG") ;
+			this.projectileTarget.src        = "sprite_sheets/projectile target.png";
+
+			this.grenadeExplosion            = document.createElement("IMG") ;
+			this.grenadeExplosion.src        = "sprite_sheets/explosion sprite.png";
 		}
 
 		// global sprite sheet object, which contains all animatable sprite sheets
@@ -283,7 +307,9 @@
 
 			this.burningTreeSound        = document.createElement("AUDIO") ;
 			this.burningTreeSound.src    = "audio files/burning tree sound.mp3" ;
-			this.burningTreeSound.volume = 0.2 ;
+			this.burningTreeSound.volume = 0.1 ;
+
+			this.projectileSound = [] ;
 		}
 
 		var audioFiles = new AudioFiles () ;
@@ -310,6 +336,8 @@
 			this.burningTree             = false ;
 			this.angel                   = false ;
 			this.projectileAnimation     = false ;
+			this.projectileTargetAnimation = false ;
+			this.grenadeExplosion          = false ;
 		}
 		// a new timeInterval object will be created as a property of level object.
 
@@ -332,13 +360,13 @@
 
 		// all common animatables come under this category
 		function Animatable (X,Y,w,h,tAF) {
-			this.type ;
 			this.x = X ;
 			this.y = Y ;
 			this.height = h ;
 			this.width = w ;
 			this.totalAnimationFrames = tAF ;
 			this.currentHorizontalAnimationFrameIndex = 0 ;
+			this.hidden = false ;
 
 			this.getBoundary = function () {
 				if (this.x && this.y) {
@@ -357,10 +385,58 @@
 		}
 
 		// this object gives the AI the choices of direction that are available at that point for the AI to turn
-		function TurnPostion (X,Y) {
+		function TurnPosition (X,Y) {
 			this.x = X ;
 			this.y = Y ;
-			this.directions = ["north" , "south" , "east" , "west"] ;
+			this.availableTurnDirections = ["north" , "south" , "east" , "west"] ;
+			this.unexploredDirections = [] ;
+		}
+
+		function Projectile (sX,sY,dX,dY,type) {
+			this.type = type ;
+			this.animation = new Animatable(sX,sY,10,10,8) ;
+			this.targetAnimation = new Animatable(undefined,undefined,50,25,6) ;
+			this.destination = { x : dX , y : dY } ;
+			this.range = Math.sqrt( Math.pow((dX-sX),2) + Math.pow((dY-sY),2) ) ;
+			this.projectionAngle = Math.PI/4 ;
+			this.gravity = 0.05 ;
+			this.speed = Math.sqrt(this.range*this.gravity/Math.sin(2*this.projectionAngle)) ;
+			this.clickAngle ;
+			this.velocity ;
+			this.acceleration ;
+			//depending upon speed , gravity , angle of projection the time taken for the projectile to reach the destination varies
+			this.initialize = function () {
+				if (dX >= sX && dY >= sY) {
+					// 4th quadrant
+					this.clickAngle = Math.atan( Math.abs( (dX-sX)/(dY-sY) ) ) ;                    
+                    this.velocity = { x : this.speed*Math.sin(this.projectionAngle + this.clickAngle) , y : this.speed*Math.cos(this.projectionAngle + this.clickAngle) } ;
+                    this.acceleration = { x : -1*this.gravity*Math.cos(this.clickAngle) , y : this.gravity*Math.sin(this.clickAngle) } ;
+				} else if (dX >= sX && dY <= sY) {
+					// 4th quadrant
+					this.clickAngle = Math.atan( Math.abs( (dY-sY)/(dX-sX) ) ) ;                    
+                    this.velocity = { x : this.speed*Math.cos(this.projectionAngle + this.clickAngle) , y : -1*this.speed*Math.sin(this.projectionAngle + this.clickAngle) } ;
+                    this.acceleration = { x : this.gravity*Math.sin(this.clickAngle) , y : this.gravity*Math.cos(this.clickAngle) } ;
+				} else if (dX <= sX && dY >= sY) {
+					// 4th quadrant
+					this.clickAngle = Math.atan( Math.abs( (dX-sX)/(dY-sY) ) ) ;                    
+                    this.velocity = { x : -1*this.speed*Math.sin(this.projectionAngle + this.clickAngle) , y : this.speed*Math.cos(this.projectionAngle + this.clickAngle) } ;
+                    this.acceleration = { x : this.gravity*Math.cos(this.clickAngle) , y : this.gravity*Math.sin(this.clickAngle) } ;
+				} else if (dX <= sX && dY <= sY) {
+					// 4th quadrant
+					this.clickAngle = Math.atan( Math.abs( (dY-sY)/(dX-sX) ) ) ;                    
+                    this.velocity = { x : -1*this.speed*Math.cos(this.projectionAngle + this.clickAngle) , y : -1*this.speed*Math.sin(this.projectionAngle + this.clickAngle) } ;
+                    this.acceleration = { x : -1*this.gravity*Math.sin(this.clickAngle) , y : this.gravity*Math.cos(this.clickAngle) } ;
+				}
+			}
+			this.update = function () {
+				this.velocity.x += this.acceleration.x ;
+				this.velocity.y += this.acceleration.y ;
+				this.animation.x += this.velocity.x ;
+				this.animation.y += this.velocity.y ;
+			}
+			this.getBoundary = function () {
+				return { "north":this.destination.y-5 , "east":this.destination.x+5 , "west":this.destination.x-5 , "south":this.destination.y+5 } ;
+			}
 		}
 
 		function Protagonist () {
@@ -385,13 +461,13 @@
 
 			this.collision = {"south" : false , "north" : false ,"east" : false ,"west" : false} ;
 
+			this.exitDoorKeyCollected = false ;
+
+			this.weaponSelected = "stone" ;
+
 			this.getBoundary = function () {
 				return { "north":370-50/2 , "east":760+50/2 , "west":760-50/2 , "south":370+50/2 } ;
 			}
-
-			this.exitDoorKeyCollected = false ;
-
-			this.projectileSelected = "stone" ;
 
 		}
 
@@ -416,21 +492,13 @@
 
 			this.collision = {"south" : false , "north" : false ,"east" : false ,"west" : false} ;
 
+			this.turnPositions = [] ;
+
 			this.getBoundary = function () {
 				return { "north":this.y-this.height/2 , "east":this.x+this.width/2 , "west":this.x-this.width/2 , "south":this.y+this.height/2 } ;
 			}
 
 		}
-
-		function Projectile (X,Y) {
-			this.destinationX = X ;
-			this.destinationY = Y ;
-			this.speed ; // fix a default value
-			this.angle ; // this is the total angle wrt +y axis which is = angle of projection + the angle of click, fix a default angle of projection
-			this.gravity ; // fix a default gravity 
-		}
-
-
 
 
 		
@@ -439,7 +507,7 @@
 
 			this.initialize = function () {
 
-				This = this ; // keyword "this" cannot be used inside window or document object's methods cuz "this" refer to the object which in those cases window or document , so we need to store the level constructor's reference in a variable and so is This
+				This = this ; // keyword "this" cannot be used inside window or document object's methods cuz "this" refer to the object which in those cases is window or document , so we need to store the level constructor's reference in a variable.
 
 //---------------------------------------------------------------------------properties of objects of type Level----------------------------------------------------------------------------
 
@@ -473,10 +541,40 @@
 
 				this.otherCharacters = [] ;
 
-				this.turnPostions = [] ;
+				this.projectiles     = [] ; // array of projectiles
 
-				this.projectilesThrown = [] ; // array of animatables
-				this.projectiles       = [] ; // array of projectiles
+				this.grenadeExplosions = [] ;
+
+				this.timeIntervals.projectileAnimation = setInterval( function () {
+                	for (This.i = 0 ; This.i < This.projectiles.length ; This.i++) {
+                		if (This.projectiles[This.i].animation.currentHorizontalAnimationFrameIndex == This.projectiles[This.i].animation.totalAnimationFrames - 1) {
+                			This.projectiles[This.i].animation.currentHorizontalAnimationFrameIndex = 0 ;
+                		} else {
+                			This.projectiles[This.i].animation.currentHorizontalAnimationFrameIndex ++ ;
+                		}
+                	}
+                } , 50 ) ;
+
+                this.timeIntervals.projectileTargetAnimation = setInterval( function () {
+                	for (This.i = 0 ; This.i < This.projectiles.length ; This.i++) {
+                		if (This.projectiles[This.i].targetAnimation.currentHorizontalAnimationFrameIndex == This.projectiles[This.i].targetAnimation.totalAnimationFrames - 1) {
+                			This.projectiles[This.i].targetAnimation.currentHorizontalAnimationFrameIndex = 0 ;
+                		} else {
+                			This.projectiles[This.i].targetAnimation.currentHorizontalAnimationFrameIndex ++ ;
+                		}
+                	}
+                } , 70 ) ;
+
+                this.timeIntervals.grenadeExplosion = setInterval( function () {
+                	for (This.i = 0 ; This.i < This.grenadeExplosions.length ; This.i++) {
+                		if (This.grenadeExplosions[This.i].currentHorizontalAnimationFrameIndex == This.grenadeExplosions[This.i].totalAnimationFrames - 1) {
+                			This.grenadeExplosions.splice(This.i,1) ;
+                			This.i-- ;
+                		} else {
+                			This.grenadeExplosions[This.i].currentHorizontalAnimationFrameIndex ++ ;
+                		}
+                	}
+                } , 70 ) ;
 
 //----------------------------------------------------------creating pillar objects in the basic layout and coins associated with them-------------------------------------------------------
 
@@ -548,30 +646,6 @@
 						This.burningTree.currentHorizontalAnimationFrameIndex ++ ;
 					}
 				} , 180 ) ;
-
-//----------------------------------------------------------------------------------creating the turn positions-----------------------------------------------------------------------------
-
-                for (this.i = 0 ; this.i < 8 ; this.i ++) {
-                	for (this.j = 0 ; this.j < 13 ; this.j ++) {
-                		this.turnPostions[13*this.i+this.j] = new TurnPostion(this.protagonist.x+this.j*200,this.protagonist.y+this.i*200) ;
-                		// the turn positions present near the dungeon boundary should have the respective direction(s) removed from the directions array
-                		if (this.j == 0) {
-                			// remove west from the array
-                			this.turnPostions[13*this.i+this.j].directions.splice(3,1) ;
-                		} else if (this.j == 12) {
-                			// remove east from the array
-                			this.turnPostions[13*this.i+this.j].directions.splice(2,1) ;
-                		}
-                		if (this.i == 0) {
-                			// remove north from the array
-                			this.turnPostions[13*this.i+this.j].directions.splice(0,1) ;
-                		} else if (this.i == 7) {
-                			// remove south from the array
-                			this.turnPostions[13*this.i+this.j].directions.splice(1,1) ;
-                		}
-                	}                	
-                }
-
 //---------------------------------------------------------------------------------generating random walls----------------------------------------------------------------------------------
 
 				// creating wall for each pillar
@@ -623,59 +697,14 @@
 						this.i -- ;
 						continue ;
 					}
-					// only 1x1 boxes are controllable , large boxes can still be formed                     
-
-				    //---------------------------------------------------updating the turn position's directions array according to each wall------------------------------------------
-
-				    // refer what wall type means
-				    if (this.dungeonWalls[this.i].type == 0 || this.dungeonWalls[this.i].type == 2) {
-				    	// i need to change the turn positions on top and bottom of the wall
-				    	for (this.j = 0 ; this.j < this.turnPostions.length ; this.j++) {
-				    	    // turn position to the top of the wall will have south removed and the one to the bottom will have north removed from it's directions array
-				    	    if (this.dungeonWalls[this.i].x == this.turnPostions[this.j].x && this.dungeonWalls[this.i].y-100 == this.turnPostions[this.j].y) {
-				    		    for (this.rand = 0 ; this.rand < this.turnPostions[this.j].directions.length ; this.rand ++) {
-				    		    	if (this.turnPostions[this.j].directions[this.rand] == "south") {
-				    		    		this.turnPostions[this.j].directions.splice(this.rand,1) ;
-				    		    		this.rand -- ;
-				    		    	}
-				    		    }
-				    	    } 
-				    	    else if (this.dungeonWalls[this.i].x == this.turnPostions[this.j].x && this.dungeonWalls[this.i].y+100 == this.turnPostions[this.j].y) {
-				    		    for (this.rand = 0 ; this.rand < this.turnPostions[this.j].directions.length ; this.rand ++) {
-				    		    	if (this.turnPostions[this.j].directions[this.rand] == "north") {
-				    		    		this.turnPostions[this.j].directions.splice(this.rand,1) ;
-				    		    		this.rand -- ;
-				    		    	}
-				    		    }
-				    	    }	 			    		
-				    	}
-				    } else if (this.dungeonWalls[this.i].type == 1 || this.dungeonWalls[this.i].type == 3) {
-				    	// i need to change the turn positions on top and bottom of the wall
-				    	for (this.j = 0 ; this.j < this.turnPostions.length ; this.j++) {
-				    	    // turn position to the left of the wall will have east removed and the one to the right will have west removed from it's directions array
-				    	    if (this.dungeonWalls[this.i].x-100 == this.turnPostions[this.j].x && this.dungeonWalls[this.i].y == this.turnPostions[this.j].y) {
-				    		    for (this.rand = 0 ; this.rand < this.turnPostions[this.j].directions.length ; this.rand ++) {
-				    		    	if (this.turnPostions[this.j].directions[this.rand] == "east") {
-				    		    		this.turnPostions[this.j].directions.splice(this.rand,1) ;
-				    		    		this.rand -- ;
-				    		    	}
-				    		    }
-				    	    } 
-				    	    else if (this.dungeonWalls[this.i].x+100 == this.turnPostions[this.j].x && this.dungeonWalls[this.i].y == this.turnPostions[this.j].y) {
-				    		    for (this.rand = 0 ; this.rand < this.turnPostions[this.j].directions.length ; this.rand ++) {
-				    		    	if (this.turnPostions[this.j].directions[this.rand] == "west") {
-				    		    		this.turnPostions[this.j].directions.splice(this.rand,1) ;
-				    		    		this.rand -- ;
-				    		    	}
-				    		    }
-				    	    }	 			    		
-				    	}
-				    }
-
+					// only 1x1 boxes are controllable , large boxes can still be formed   
 
 					//---------------------------------------------------------------creating an angel once all walls are created------------------------------------------------------
 					if (this.i == 83) {
 						this.otherCharacters[this.otherCharacters.length] = new OtherCharacter(this.dungeonPillars[this.i].x+100,this.dungeonPillars[this.i].y+100,"angel",6,50,25,1) ;
+						this.setAndUpdateTurnPositions(this.otherCharacters.length-1) ;
+						// i'm doing this because the fn setAnd UpdateTurnPositions uses this.i
+						this.i = 83 ;
 						// orienting it according to wall's position
 						if (this.dungeonWalls[this.i].type == 0) {
 							this.otherCharacters[this.otherCharacters.length - 1].direction = "west" ;
@@ -685,6 +714,13 @@
 						// setting its movement animation
 						this.setIntervalForOtherCharacters(this.otherCharacters.length - 1 , 150) ;				        
 				    }			    
+
+				    // im hiding the coins that overlap with dungeon wall
+				    for (this.j = 0 ; this.j < this.coins.length ; this.j++) {
+				    	if (this.coins[this.j].x == this.dungeonWalls[this.i].x && this.coins[this.j].y == this.dungeonWalls[this.i].y) {
+				    		this.coins[this.j].hidden = true ;
+				    	}
+				    }
       
 					// now i need to unshadow few pillars cuz all pillars by default are shadowed
 					if (this.dungeonWalls[this.i].type == 1) {
@@ -698,11 +734,11 @@
 //---------------------------------------------------------------------------------------creating random exit door key------------------------------------------------------------------------
 
                 // key should not exist in near the 1st 4x4 pillars, i.e 0,1,2,3,12,13,14,15,24,25,26,27,36,37,38,39. cuz that would be easy
-                // key should also not be very close to the tree
                for( this.rand = 4+Math.floor(100*Math.random()/(100/80)) ; ; this.rand = 4+Math.floor(100*Math.random()/(100/80)) ) {
                 	if ( (this.rand >=12 && this.rand <=15) || (this.rand >=24 && this.rand <=27) || (this.rand >=36 && this.rand <=39) ) {
                 		continue ;
                 	}else if (this.rand == 41 || this.rand == 42 || this.rand == 29 || this.rand == 30 || this.rand == 53 || this.rand == 54) {
+                		// key should not be close to the tree too
                 		continue ;
                 	}
                 	break ;
@@ -732,19 +768,28 @@
                 		this.exitDoorKey.x -= 100 ;
                 	}
 
+                	
+                    // checking if the key overlaps with any of the walls
                 	if (this.rand != 4 && this.rand != 5) {
                 		if ( this.i > 12 && this.exitDoorKey.x == this.dungeonWalls[this.i-12].x && this.exitDoorKey.y == this.dungeonWalls[this.i-12].y) {
+                		    // checking if it overlaps with wall of the vertically preceeding pillar
                 			continue ;
                 		} else if (this.exitDoorKey.x == this.dungeonWalls[this.i-1].x && this.exitDoorKey.y == this.dungeonWalls[this.i-1].y) {
+                			// this.i cannot be 0 so this.i is not checked again whether it is > 0 or not
+                			// checking if it overlaps with wall of horizontally preceeding pillar
                 			continue ;
                 		} else if (this.exitDoorKey.x == this.dungeonWalls[this.i].x && this.exitDoorKey.y == this.dungeonWalls[this.i].y) {
+                			// checking if it overlaps with the wall of the current pillar
                 			continue ;
-                		} else if ( this.i !=83 && this.exitDoorKey.x == this.dungeonWalls[this.i+1].x && this.exitDoorKey.y == this.dungeonWalls[this.i+1].y) {
+                		} else if ( this.i != 83 && this.exitDoorKey.x == this.dungeonWalls[this.i+1].x && this.exitDoorKey.y == this.dungeonWalls[this.i+1].y) {
+                			// checking if it overlaps with the wall of horizontally succeeding pillar
                 			continue ;
                 		} else if ( this.i < 72 && this.exitDoorKey.x == this.dungeonWalls[this.i+12].x && this.exitDoorKey.y == this.dungeonWalls[this.i+12].y) {
+                			// checking if it overlaps with the wall of vertically succeeding pillar
                 			continue ;
                 		}
                 	}
+                	// i'm not checking for the walls type cuz this.i-1 can even point to the pillar which can be in the previous row
 
                 	break ;
                 }
@@ -781,8 +826,7 @@
 			            }		        
 
 	                }, 1000 ) ;
-			    }         
-
+			    }   
 
 //----------------------------------------------------------------------------------level starting animation--------------------------------------------------------------------------------
 	            // this will be the last piece of code in method initialize()
@@ -798,6 +842,84 @@
 
 			}// method initialize ends here
 
+
+
+            this.setAndUpdateTurnPositions = function (index) {
+            	// setting the turn positions
+            	for (this.i = 0 ; this.i < 8 ; this.i ++) {
+                	for (this.j = 0 ; this.j < 13 ; this.j ++) {
+                		this.otherCharacters[index].turnPositions[13*this.i+this.j] = new TurnPosition(760+this.j*200,370+this.i*200) ;
+                		// the turn positions present near the dungeon boundary should have the respective direction(s) removed from the availableTurnDirections array
+                		if (this.j == 0) {
+                			// remove west from the array
+                			this.otherCharacters[index].turnPositions[13*this.i+this.j].availableTurnDirections.splice(3,1) ;
+                		} else if (this.j == 12) {
+                			// remove east from the array
+                			this.otherCharacters[index].turnPositions[13*this.i+this.j].availableTurnDirections.splice(2,1) ;
+                		}
+                		if (this.i == 0) {
+                			// remove north from the array
+                			this.otherCharacters[index].turnPositions[13*this.i+this.j].availableTurnDirections.splice(0,1) ;
+                		} else if (this.i == 7) {
+                			// remove south from the array
+                			this.otherCharacters[index].turnPositions[13*this.i+this.j].availableTurnDirections.splice(1,1) ;
+                		}
+                	}                	
+                }
+
+                // updating the turn positions
+                for (this.i = 0 ; this.i < this.dungeonWalls.length ; this.i++) {
+                	// refer what wall type means
+				    if (this.dungeonWalls[this.i].type == 0 || this.dungeonWalls[this.i].type == 2) {
+				    	// i need to change the turn positions on top and bottom of the wall
+				    	for (this.j = 0 ; this.j < this.otherCharacters[index].turnPositions.length ; this.j++) {
+				    	    // turn position to the top of the wall will have south removed and the one to the bottom will have north removed from it's availableTurnDirections array and unexploredDirections array
+				    	    if (this.dungeonWalls[this.i].x == this.otherCharacters[index].turnPositions[this.j].x && 
+				    	    	                                                            this.dungeonWalls[this.i].y-100 == this.otherCharacters[index].turnPositions[this.j].y) {
+				    		    for (this.rand = 0 ; this.rand < this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.length ; this.rand ++) {
+				    		    	if (this.otherCharacters[index].turnPositions[this.j].availableTurnDirections[this.rand] == "south") {
+				    		    		this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.splice(this.rand,1) ;
+				    		    		this.rand -- ;
+				    		    	}
+				    		    }
+				    	    } 
+				    	    else if (this.dungeonWalls[this.i].x == this.otherCharacters[index].turnPositions[this.j].x && 
+				    	    	                                                             this.dungeonWalls[this.i].y+100 == this.otherCharacters[index].turnPositions[this.j].y) {
+				    		    for (this.rand = 0 ; this.rand < this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.length ; this.rand ++) {
+				    		    	if (this.otherCharacters[index].turnPositions[this.j].availableTurnDirections[this.rand] == "north") {
+				    		    		this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.splice(this.rand,1) ;
+				    		    		this.rand -- ;
+				    		    	}
+				    		    }
+				    	    }	 			    		
+				    	}
+				    } else if (this.dungeonWalls[this.i].type == 1 || this.dungeonWalls[this.i].type == 3) {
+				    	// i need to change the turn positions on top and bottom of the wall
+				    	for (this.j = 0 ; this.j < this.otherCharacters[index].turnPositions.length ; this.j++) {
+				    	    // turn position to the left of the wall will have east removed and the one to the right will have west removed from it's availableTurnDirections array
+				    	    if (this.dungeonWalls[this.i].x-100 == this.otherCharacters[index].turnPositions[this.j].x && 
+				    	    	                                                                 this.dungeonWalls[this.i].y == this.otherCharacters[index].turnPositions[this.j].y) {
+				    		    for (this.rand = 0 ; this.rand < this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.length ; this.rand ++) {
+				    		    	if (this.otherCharacters[index].turnPositions[this.j].availableTurnDirections[this.rand] == "east") {
+				    		    		this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.splice(this.rand,1) ;
+				    		    		this.rand -- ;
+				    		    	}
+				    		    }
+				    	    } 
+				    	    else if (this.dungeonWalls[this.i].x+100 == this.otherCharacters[index].turnPositions[this.j].x && 
+				    	    	                                                                  this.dungeonWalls[this.i].y == this.otherCharacters[index].turnPositions[this.j].y) {
+				    		    for (this.rand = 0 ; this.rand < this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.length ; this.rand ++) {
+				    		    	if (this.otherCharacters[index].turnPositions[this.j].availableTurnDirections[this.rand] == "west") {
+				    		    		this.otherCharacters[index].turnPositions[this.j].availableTurnDirections.splice(this.rand,1) ;
+				    		    		this.rand -- ;
+				    		    	}
+				    		    }
+				    	    }	 			    		
+				    	}
+				    }
+                }
+            }
+
 			this.setIntervalForOtherCharacters = function (index,aTG) {
 				this.timeIntervals[this.otherCharacters[index].name] = setInterval (function () {
 					if (This.otherCharacters[index].currentHorizontalAnimationFrameIndex == This.otherCharacters[index].totalAnimationFrames - 1) {
@@ -809,23 +931,24 @@
 			}
 
 
-			// n=0 => obj is protagonist , n=1 => other objects whose position is influenced by overallDisplacement
+			// n=1,0 imply object whose position is influenced and not influenced by overallDisplacement, eg.n=0 for protaagonist and projectiles, rest n=1
+			// m=1,0 imply obstacle whose position is influenced and not influenced by overallDisplacement eg.m=0 for projectle destination collision box and 1 for others
 			// objB is object boundary and obsB is obstacle boundary
 			// objC is object center
 			// direction holds the value of direction in which the object is moving
-			this.checkCollision = function (direction,objC,objB,obsB,n) {
-				if ( ( ((objB.north+n*this.overallDisplacement.y>obsB.north+this.overallDisplacement.y)&&(objB.north+n*this.overallDisplacement.y<obsB.south+this.overallDisplacement.y)) || 
-					   ((objB.south+n*this.overallDisplacement.y>obsB.north+this.overallDisplacement.y)&&(objB.south+n*this.overallDisplacement.y<obsB.south+this.overallDisplacement.y)) ||
-					   ((objC.y+n*this.overallDisplacement.y>obsB.north+this.overallDisplacement.y)&&(objC.y+n*this.overallDisplacement.y<obsB.south+this.overallDisplacement.y)) ) 
+			this.checkCollision = function (direction,objC,objB,obsB,n,m) {
+				if ( ( ((objB.north+n*this.overallDisplacement.y>obsB.north+m*this.overallDisplacement.y)&&(objB.north+n*this.overallDisplacement.y<obsB.south+m*this.overallDisplacement.y))       || 
+					   ((objB.south+n*this.overallDisplacement.y>obsB.north+m*this.overallDisplacement.y)&&(objB.south+n*this.overallDisplacement.y<obsB.south+m*this.overallDisplacement.y)) ||
+					   ((objC.y+n*this.overallDisplacement.y>obsB.north+m*this.overallDisplacement.y)&&(objC.y+n*this.overallDisplacement.y<obsB.south+this.overallDisplacement.y)) ) 
 					&& 
-					 ( ((objB.east+n*this.overallDisplacement.x>obsB.west+this.overallDisplacement.x)&&(objB.east+n*this.overallDisplacement.x<obsB.east+this.overallDisplacement.x)) || 
-					   ((objB.west+n*this.overallDisplacement.x>obsB.west+this.overallDisplacement.x)&&(objB.west+n*this.overallDisplacement.x<obsB.east+this.overallDisplacement.x)) ||
-					   ((objC.x+n*this.overallDisplacement.x>obsB.west+this.overallDisplacement.x)&&(objC.x+n*this.overallDisplacement.x<obsB.east+this.overallDisplacement.x)) ) ) {
+					 ( ((objB.east+n*this.overallDisplacement.x>obsB.west+m*this.overallDisplacement.x)&&(objB.east+n*this.overallDisplacement.x<obsB.east+m*this.overallDisplacement.x)) || 
+					   ((objB.west+n*this.overallDisplacement.x>obsB.west+m*this.overallDisplacement.x)&&(objB.west+n*this.overallDisplacement.x<obsB.east+m*this.overallDisplacement.x)) ||
+					   ((objC.x+n*this.overallDisplacement.x>obsB.west+m*this.overallDisplacement.x)&&(objC.x+n*this.overallDisplacement.x<obsB.east+m*this.overallDisplacement.x)) ) ) {
 
 					if (direction == "north" || direction == "south") {
-						return Math.abs(obsB[this.oppositeDirection[direction]]+this.overallDisplacement.y - (objB[direction]+n*this.overallDisplacement.y) ) ;
+						return Math.abs(obsB[this.oppositeDirection[direction]]+m*this.overallDisplacement.y - (objB[direction]+n*this.overallDisplacement.y) ) ;
 					} else if (direction == "east" || direction == "west") {
-						return Math.abs(obsB[this.oppositeDirection[direction]]+this.overallDisplacement.x - (objB[direction]+n*this.overallDisplacement.x) ) ;
+						return Math.abs(obsB[this.oppositeDirection[direction]]+m*this.overallDisplacement.x - (objB[direction]+n*this.overallDisplacement.x) ) ;
 					}  else {
 						return true ;
 					}
@@ -835,6 +958,7 @@
 				}
 			}
 
+			// here thers is no m as obstacle is always dungeon boundary
 			this.checkCollsionWithDungeonBoundary = function (direction,objB,n) {
 				if ( objB.north+n*this.overallDisplacement.y<this.dungeonBoundary.north+this.overallDisplacement.y || 
 				     objB.south+n*this.overallDisplacement.y>this.dungeonBoundary.south+this.overallDisplacement.y ||
@@ -874,6 +998,7 @@
 
 			this.changeProtagonistCharacterTo = function (character) {
 				this.protagonist.character = character ;
+				this.protagonist.weaponSelected = "stone" ;
 				for (this.direction in this.protagonist.collision) {
 					this.protagonist.collision[this.direction] = false ;
 				}
@@ -922,7 +1047,21 @@
 
 							    this.overallDisplacement.x += this.protagonist.navigationParameter[this.direction].x*this.protagonist.speed[this.protagonist.character] ;
 							    this.overallDisplacement.y += this.protagonist.navigationParameter[this.direction].y*this.protagonist.speed[this.protagonist.character] ;
+							    // if this piece of code is not there then as the protagonist moves after launching a projectile the destination image will move out of position but the projectile and destination coordinates will not move accordingly
+							    for (this.i = 0 ; this.i < this.projectiles.length ; this.i++) {
+							    	this.projectiles[this.i].animation.x += this.protagonist.navigationParameter[this.direction].x*this.protagonist.speed[this.protagonist.character] ;
+							    	this.projectiles[this.i].destination.x += this.protagonist.navigationParameter[this.direction].x*this.protagonist.speed[this.protagonist.character] ;
+							    	this.projectiles[this.i].animation.y += this.protagonist.navigationParameter[this.direction].y*this.protagonist.speed[this.protagonist.character] ;
+							    	this.projectiles[this.i].destination.y += this.protagonist.navigationParameter[this.direction].y*this.protagonist.speed[this.protagonist.character] ;
+							    }
+							    for (this.i = 0 ; this.i < this.grenadeExplosions.length ; this.i++) {
+							    	this.grenadeExplosions[this.i].x += this.protagonist.navigationParameter[this.direction].x*this.protagonist.speed[this.protagonist.character] ;
+							    	this.grenadeExplosions[this.i].x += this.protagonist.navigationParameter[this.direction].x*this.protagonist.speed[this.protagonist.character] ;
+							    	this.grenadeExplosions[this.i].y += this.protagonist.navigationParameter[this.direction].y*this.protagonist.speed[this.protagonist.character] ;
+							    	this.grenadeExplosions[this.i].y += this.protagonist.navigationParameter[this.direction].y*this.protagonist.speed[this.protagonist.character] ;
+							    }
 							}
+						
 							
 							
 
@@ -930,7 +1069,7 @@
 								// collision with pillars
 							    for (this.i=0 ; this.i < this.dungeonPillars.length ; this.i++) {
 								    this.collisionValue = this.checkCollision( this.protagonist.direction , {x:this.protagonist.x,y:this.protagonist.y} ,
-								                                               this.protagonist.getBoundary() , this.dungeonPillars[this.i].getBoundary() , 0 ) ;
+								                                               this.protagonist.getBoundary() , this.dungeonPillars[this.i].getBoundary() , 0 , 1 ) ;
 								    if( this.collisionValue != false ) {
 									    this.protagonist.collision[this.direction] = true ;
 									    this.overallDisplacement.x -= this.protagonist.navigationParameter[this.direction].x*this.collisionValue ;
@@ -943,7 +1082,7 @@
 							    if (!this.protagonist.collision[this.direction]) {
 							    	for (this.i=0 ; this.i < this.dungeonWalls.length ; this.i++) {
 									    this.collisionValue = this.checkCollision( this.protagonist.direction , {x:this.protagonist.x,y:this.protagonist.y} ,
-									    	                                       this.protagonist.getBoundary() , this.dungeonWalls[this.i].getBoundary() , 0 ) ;
+									    	                                       this.protagonist.getBoundary() , this.dungeonWalls[this.i].getBoundary() , 0 , 1 ) ;
 								        if( this.collisionValue != false ) {
 									        this.protagonist.collision[this.direction] = true ;
 									        this.overallDisplacement.x -= this.protagonist.navigationParameter[this.direction].x*this.collisionValue ;
@@ -1006,7 +1145,7 @@
 
                 if (this.protagonist.character != "eagle")
                 for (this.i = 0 ; this.i < this.coins.length ; this.i ++) {
-                	if( this.checkCollision("doesn't matter" , {x:this.protagonist.x,y:this.protagonist.y} , this.protagonist.getBoundary() , this.coins[this.i].getBoundary() , 0) ) {
+                	if( this.checkCollision("doesn't matter" , {x:this.protagonist.x,y:this.protagonist.y} , this.protagonist.getBoundary() , this.coins[this.i].getBoundary() , 0 , 1 ) ) {
                 		this.coins.splice(this.i,1) ;
                 		audioFiles.coinCollection.load() ;
                 		audioFiles.coinCollection.play() ;
@@ -1019,7 +1158,7 @@
    
                 if (!this.protagonist.exitDoorKeyCollected) {
                 	if (this.protagonist.character != "eagle" && this.checkCollision("doesn't matter" , {x:this.protagonist.x,y:this.protagonist.y} , this.protagonist.getBoundary() , 
-                	                                                                                                                               this.exitDoorKey.getBoundary() , 0) ) {
+                	                                                                                                                     this.exitDoorKey.getBoundary() , 0 , 1 ) ) {
                 	    this.protagonist.exitDoorKeyCollected = true ;
                 	    audioFiles.clue.pause() ;
                 	    audioFiles.clue.load() ;
@@ -1034,7 +1173,7 @@
                 	    }
 
                     } else {
-                	    this.vol = ( 50/Math.sqrt( Math.pow(this.protagonist.x-(this.exitDoorKey.x + this.overallDisplacement.x),2) + 
+                	    this.vol = ( 100/Math.sqrt( Math.pow(this.protagonist.x-(this.exitDoorKey.x + this.overallDisplacement.x),2) + 
                 		                       Math.pow(this.protagonist.y-(this.exitDoorKey.y + this.overallDisplacement.y),2) ) ) ;
                 	    if (this.vol > 1) {
                 		    this.vol = 1 ;
@@ -1044,7 +1183,7 @@
                     }
                 } else {
                 	if (this.protagonist.character == "professor" && this.checkCollision("doesn't matter" , {x:this.protagonist.x,y:this.protagonist.y} , this.protagonist.getBoundary() , 
-                	                                                                                                                               this.exitDoor.getBoundary() , 0) ) {
+                	                                                                                                                     this.exitDoor.getBoundary() , 0 , 1 ) ) {
                 		if (controls.others.interact == true) {
                 			controls.others.interact = false ;
                 			gameStatus = "level completed" ;
@@ -1073,33 +1212,67 @@
 	                        this.finish() ;
                 		}
                 	} else {
-                	    audioFiles.clue.volume = ( 25/Math.sqrt( Math.pow(this.protagonist.x-(this.exitDoor.x + this.overallDisplacement.x),2) + 
-                		                       Math.pow(this.protagonist.y-(this.exitDoor.y + this.overallDisplacement.y),2) ) ) ;                	    
+                	    this.vol = ( 150/Math.sqrt( Math.pow(this.protagonist.x-(this.exitDoor.x + this.overallDisplacement.x),2) + 
+                		                                                                            Math.pow(this.protagonist.y-(this.exitDoor.y + this.overallDisplacement.y),2) ) ) ;  
+                	    if (this.vol > 1) {
+                		    this.vol = 1 ;
+                	    }  
+                		audioFiles.clue.volume = this.vol ;         	    
                 	    audioFiles.clue.play() ;
                     }
                 }
 //----------------------------------------------------------------------------------setting burning tree volume------------------------------------------------------------------------------
             
-                audioFiles.burningTreeSound.volume = 0.2*( 50/Math.sqrt( Math.pow(this.protagonist.x-(this.burningTree.x + this.overallDisplacement.x),2) + 
-                		                               Math.pow(this.protagonist.y-(this.burningTree.y + this.overallDisplacement.y),2) ) ) ;
-
+                this.vol = 0.15*( 100/Math.sqrt( Math.pow(this.protagonist.x-(this.burningTree.x + this.overallDisplacement.x),2) + 
+                		                                                                          Math.pow(this.protagonist.y-(this.burningTree.y + this.overallDisplacement.y),2) ) ) ;
+                if (this.vol > 1) {
+                	this.vol = 1 ;
+                }
+                audioFiles.burningTreeSound.volume = this.vol ;
                 audioFiles.burningTreeSound.play() ;
 //--------------------------------------------------------------------------------other characters movement logic----------------------------------------------------------------------------
 
                 for (this.i = 0 ; this.i < this.otherCharacters.length ; this.i++ ) {
                 	this.otherCharacters[this.i].x += this.otherCharacters[this.i].navigationParameter[this.otherCharacters[this.i].direction].x*this.otherCharacters[this.i].speed ;
 				    this.otherCharacters[this.i].y += this.otherCharacters[this.i].navigationParameter[this.otherCharacters[this.i].direction].y*this.otherCharacters[this.i].speed ;
-                	for (this.j = 0 ; this.j < this.turnPostions.length ; this.j++) {
-                		if (this.otherCharacters[this.i].x == this.turnPostions[this.j].x && this.otherCharacters[this.i].y == this.turnPostions[this.j].y) {
-                			if (this.turnPostions[this.j].directions.length == 1) {
+                	for (this.j = 0 ; this.j < this.otherCharacters[this.i].turnPositions.length ; this.j++) {
+                		if (this.otherCharacters[this.i].x == this.otherCharacters[this.i].turnPositions[this.j].x && 
+                			                                                                  this.otherCharacters[this.i].y == this.otherCharacters[this.i].turnPositions[this.j].y) {
+                			if (this.otherCharacters[this.i].turnPositions[this.j].availableTurnDirections.length == 1) {
+                				// opposite direction will be the only available direction
                 				this.otherCharacters[this.i].direction = this.oppositeDirection[this.otherCharacters[this.i].direction] ;
                 			} else {
-                				this.previousDirection = this.otherCharacters[this.i].direction ;
-                				do {
-                					this.otherCharacters[this.i].direction = 
-                					                            this.turnPostions[this.j].directions[Math.floor(100*Math.random()/(100/this.turnPostions[this.j].directions.length))] ;
-                				} while (this.otherCharacters[this.i].direction == this.oppositeDirection[this.previousDirection]) ;
+                				// i'm  removing the current directions opp direction from the array unexploredDirections
+                				for (this.rand = 0 ; this.rand < this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections.length ; this.rand ++) {
+                					if (this.oppositeDirection[this.otherCharacters[this.i].direction]==this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections[this.rand]) {
+                						this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections.splice(this.rand,1) ;
+                						break ;
+                					}
+                				}
+                				// if unexploredDirections array is empty then copy all the available turn directions except the direction opp to current direction to unexploredDirections and repeat the process
+                				if (this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections.length == 0) {
+                					for (this.rand = 0 ; this.rand < this.otherCharacters[this.i].turnPositions[this.j].availableTurnDirections.length ; this.rand ++) {
+                						if (this.oppositeDirection[this.otherCharacters[this.i].direction] != 
+                							                                                    this.otherCharacters[this.i].turnPositions[this.j].availableTurnDirections[this.rand]) {
+                						    this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections.push( 
+                						    	                                             this.otherCharacters[this.i].turnPositions[this.j]. availableTurnDirections[this.rand] ) ;
+                					    }
+                						
+                					}
+                				}
+                				this.otherCharacters[this.i].direction = this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections[Math.floor(100*Math.random() / 
+                					                            	                                (100/this.otherCharacters[this.i].turnPositions[this.j].unexploredDirections.length))] ;
                 			}
+                		}
+                	}
+                }
+//-------------------------------------------------------------------------------------selecting the weapon---------------------------------------------------------------------------------
+ 
+                if (controls.weapon.grenade || controls.weapon.stone || controls.weapon.flashbang) {
+                	for (this.weapon in controls.weapon) {
+                		if(controls.weapon[this.weapon]) {
+                			this.protagonist.weaponSelected = this.weapon ;
+                			controls.weapon[this.weapon] = false ;
                 		}
                 	}
                 }
@@ -1108,19 +1281,37 @@
 
                 if (controls.throwProjectile) {
                 	controls.throwProjectile = false ;
+                	// checking if the projectile destination is inside the dungeon
+                	if ( mouseAim.clickAtX < this.dungeonBoundary.east+this.overallDisplacement.x && mouseAim.clickAtX > this.dungeonBoundary.west+this.overallDisplacement.x && 
+                	     mouseAim.clickAtY < this.dungeonBoundary.south+this.overallDisplacement.y && mouseAim.clickAtY > this.dungeonBoundary.north+this.overallDisplacement.y )
+                	if ( this.protagonist.character == "combatant" || (this.protagonist.character == "professor" && this.protagonist.weaponSelected == "stone") ) {   
+                	    this.projectiles[this.projectiles.length] = new Projectile( this.protagonist.x , this.protagonist.y , mouseAim.clickAtX , mouseAim.clickAtY , 
+                	    	                                                                                                                 this.protagonist.weaponSelected);
+                	    this.projectiles[this.projectiles.length-1].initialize() ;
+                	    audioFiles.projectileSound[this.projectiles.length-1] = document.createElement("AUDIO") ;
+                	    audioFiles.projectileSound[this.projectiles.length-1].src = "audio files/" + this.protagonist.weaponSelected + " strike sound.mp3" ;
+                	    if (this.protagonist.weaponSelected == "flashbang") {
+                	    	audioFiles.projectileSound[this.projectiles.length-1].volume = 0.02 ;
+                	    } else {
+                	    	audioFiles.projectileSound[this.projectiles.length-1].volume = 0.05 ;
+                	    }                	    
+                    }
+                }
+                
+//------------------------------------------------------------------------------------------updating all projectiles-------------------------------------------------------------------------
 
-                	this.projectilesThrown[this.projectilesThrown.length] = new new Animatable(this.protagonist.x,this.protagonist.y,20,20,4) ;
-                	this.projectilesThrown[this.projectilesThrown.length-1].type = this.protagonist.projectileSelected ;
-                	this.projectiles[this.projectiles.length] = new new Projectile(mouseAim.clickAtX,mouseAim.clickAtY) ;
-
-                	if (!this.timeIntervals.projectileAnimation) {
-                		this.timeIntervals.projectileAnimation = setInterval( function() {
-                			for (This.i = 0 ; This.i < This.projectiles.length ; This.i++) {
-                				// update the "projectilesThrown" array of animatables using corresponding projectile from the array of projectiles "projectiles".
-                				// if the destination is reached splice the animatable and projectile from respective arrays
-                				// if it the last projectile clear this timeInterval in addition to splicing
-                			}
-                		} , 100 ) ;
+                for (this.i = 0 ; this.i < this.projectiles.length ; this.i++) {
+                	// projectile.getBoundary() gives the destination collision box
+                	if (this.checkCollision("doesn't matter" , {x:this.projectiles[this.i].animation.x,y:this.projectiles[this.i].animation.y} , 
+                		                                 this.projectiles[this.i].animation.getBoundary() , this.projectiles[this.i].getBoundary() , 0 , 0 )) {
+                		if (this.projectiles[this.i].type == "grenade") {
+                			this.grenadeExplosions[this.grenadeExplosions.length] = new Animatable(this.projectiles[this.i].destination.x,this.projectiles[this.i].destination.y,80,80,15) ;
+                		}
+                		audioFiles.projectileSound[this.i].play() ;
+                		this.projectiles.splice(this.i,1) ;
+                		audioFiles.projectileSound.splice(this.i,1) ;
+                	} else {
+                		this.projectiles[this.i].update() ;
                 	}
                 }
 
@@ -1145,13 +1336,6 @@
 				}
 				// no need to draw the pillars that are shadowed cuz they are included in the default layout
 
-				// drawing the coins
-				for (this.i = 0 ; this.i < this.coins.length ; this.i ++) {
-					context.drawImage( spriteSheets.coinRotation , this.coins[this.i].currentHorizontalAnimationFrameIndex*this.coins[this.i].width , 0 ,this.coins[this.i].width , 
-						               this.coins[this.i].height , this.coins[this.i].x-this.coins[this.i].width/2+this.overallDisplacement.x , 
-						               this.coins[this.i].y-this.coins[this.i].height/2+this.overallDisplacement.y , this.coins[this.i].width , this.coins[this.i].height ) ;
-				}
-
 
 				// drawing the walls
 				for (this.i = 0; this.i < this.dungeonWalls.length; this.i++) {
@@ -1164,6 +1348,25 @@
 					// drawing the dungeon's upper boundary walls that should be unshadowed
 					if (this.i<12 && this.dungeonWalls[this.i].type == 3) {
 						context.drawImage(images.wallWithoutShadow,this.dungeonWalls[this.i].x-50+this.overallDisplacement.x,this.dungeonWalls[this.i].y-50+this.overallDisplacement.y-100) ;
+					}
+				}
+
+				// drawing projectile targets
+				for (this.i = 0 ; this.i < this.projectiles.length ; this.i++) {
+					context.drawImage( spriteSheets.projectileTarget , 
+						               this.projectiles[this.i].targetAnimation.currentHorizontalAnimationFrameIndex*this.projectiles[this.i].targetAnimation.width , 0 , 
+						               this.projectiles[this.i].targetAnimation.width , this.projectiles[this.i].targetAnimation.height , 
+						               this.projectiles[this.i].destination.x-this.projectiles[this.i].targetAnimation.width/2 ,
+					                   this.projectiles[this.i].destination.y-this.projectiles[this.i].targetAnimation.height/2 , 
+					                   this.projectiles[this.i].targetAnimation.width , this.projectiles[this.i].targetAnimation.height ) ;
+				}
+
+				// drawing the coins
+				for (this.i = 0 ; this.i < this.coins.length ; this.i ++) {
+					if (!this.coins[this.i].hidden) {
+						context.drawImage( spriteSheets.coinRotation , this.coins[this.i].currentHorizontalAnimationFrameIndex*this.coins[this.i].width , 0 ,this.coins[this.i].width , 
+						                   this.coins[this.i].height , this.coins[this.i].x-this.coins[this.i].width/2+this.overallDisplacement.x , 
+						                   this.coins[this.i].y-this.coins[this.i].height/2+this.overallDisplacement.y , this.coins[this.i].width , this.coins[this.i].height ) ;
 					}
 				}
 
@@ -1213,6 +1416,25 @@
 					                  this.protagonist.x-this.protagonist.width/2,this.protagonist.y-this.protagonist.height/2,this.protagonist.width,this.protagonist.height) ;
 				}
 
+				// drawing projectile
+				for (this.i = 0 ; this.i < this.projectiles.length ; this.i++) {
+					context.drawImage( spriteSheets[this.projectiles[this.i].type] , 
+						               this.projectiles[this.i].animation.currentHorizontalAnimationFrameIndex*this.projectiles[this.i].animation.width , 0 , 
+						               this.projectiles[this.i].animation.width , this.projectiles[this.i].animation.height , 
+						               this.projectiles[this.i].animation.x-this.projectiles[this.i].animation.width/2 ,
+					                   this.projectiles[this.i].animation.y-this.projectiles[this.i].animation.height/2 , 
+					                   this.projectiles[this.i].animation.width , this.projectiles[this.i].animation.height ) ;
+				}
+
+				// drawing the explosion
+				for (this.i = 0 ; this.i < this.grenadeExplosions.length ; this.i++) {
+					context.drawImage( spriteSheets.grenadeExplosion , this.grenadeExplosions[this.i].currentHorizontalAnimationFrameIndex*this.grenadeExplosions[this.i].width , 0 , 
+						               this.grenadeExplosions[this.i].width , this.grenadeExplosions[this.i].height , 
+						               this.grenadeExplosions[this.i].x-this.grenadeExplosions[this.i].width/2 ,
+					                   this.grenadeExplosions[this.i].y-this.grenadeExplosions[this.i].height , 
+					                   this.grenadeExplosions[this.i].width , this.grenadeExplosions[this.i].height ) ;
+				}
+
 				// drawing dungeon vision
 				if (displayDungeonVision) {
 					context.drawImage(images.dungeonVision[this.protagonist.character],0,0) ;
@@ -1257,7 +1479,15 @@
 				}
 
 				for (this.audioFile in audioFiles) {
-					if (this.audioFile != "gameOver" && this.audioFile != "levelCompleted") {
+					if (this.audioFile == "projectileSound") {
+						while (audioFiles[this.audioFile].length > 0) {
+							// im not pausing the sounds here cuz the sounds that are palyed have already been popped, the ones yet to be played i.e projectiles havent reached their destination yet, just needs to be popped.
+							audioFiles[this.audioFile].pop() ;
+							// so the sounds that are being played no longer exist, so they cannot be paused :'(
+						}
+						console.log(audioFiles[this.audioFile].length) ;
+					}
+					else if (this.audioFile != "gameOver" && this.audioFile != "levelCompleted") {
 						audioFiles[this.audioFile].pause();
 					    audioFiles[this.audioFile].load();
 					}

@@ -89,18 +89,30 @@
 <body>
 	<h3 style="margin: 0px;">Sign Up :</h3>
 	<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>">
-	    <input type="text" name="username" placeholder="username.." value="<?php echo $un ?>"> <span class="imp"><?php echo "* $unerror" ?></span><br>
-		<input type="password" name="password" placeholder="password.."> <span class="imp"><?php echo "* $passerror" ?></span><br>
+	    <input type="text" name="username" placeholder="username.." value="<?php echo $un ?>" onkeyup="getUsernames(this.value)"> <span class="imp"><?php echo "* $unerror" ?></span><br>
+        <input type="password" name="password" placeholder="password.."> <span class="imp"><?php echo "* $passerror" ?></span><br>
 		<input type="password" name="cPassword" placeholder="confirm password.."> <span class="imp"><?php echo "*" ?></span><br>
 		<input type="submit" value="Sign up" > <span class="imp"><?php echo "* required" ?></span>
 	</form>
     <hr>
     <button onclick="gotologinpage()">Go to Log in</button><br>
     <hr>
+    <p>username availability : <span id="usernames"></span></p>
+    <hr>
     <?php echo $success ?>
     <script type="text/javascript">
         function gotologinpage() {
             window.location.assign("loginpage.php") ;
+        }
+        function getUsernames(uName) {
+            xhttp = new XMLHttpRequest() ;
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("usernames").innerHTML = this.responseText ;
+                }
+            }
+            xhttp.open("GET" , "getusernameavailability.php?uName="+uName , true) ;
+            xhttp.send() ;
         }
     </script>
 	</body>
